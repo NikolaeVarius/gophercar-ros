@@ -3,10 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/aler9/goroslib"
-	"github.com/aler9/goroslib/msgs/sensor_msgs"
+	//"github.com/aler9/goroslib/msgs"
+        "github.com/aler9/goroslib/msgs/sensor_msgs"
 )
 
-func onMessage(msg *sensor_msgs.Imu) {
+func onMessage(msg *sensor_msgs.Joy) {
 	fmt.Printf("Incoming: %+v\n", msg)
 }
 
@@ -28,7 +29,6 @@ func main() {
 		Node:     n,
 		Topic:    "/joy",
 		Callback: onMessage,
-		msgType: "joy",
 	})
 	if err != nil {
 		panic(err)
