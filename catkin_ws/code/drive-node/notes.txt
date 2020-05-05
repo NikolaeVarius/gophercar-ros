@@ -1,0 +1,19 @@
+channel,on,duty
+
+all.300,0   = hard left
+all,200,300 = right right
+all,280,280 = relaxed
+all,300,300 = relaxed
+all,300,400 = hard right
+all,300,500 = super hard right
+all,400,400 = relaxed
+all,400,450 = right
+all,450,450 = relaxed
+all,400,500 = left, hard right
+all,450,550 = left, hard right
+all,500,500 = nothing
+all,500,800 - reset??
+
+
+700,700 = nothing
+800,800 = nothing

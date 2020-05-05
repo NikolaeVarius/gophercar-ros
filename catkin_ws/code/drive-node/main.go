@@ -24,12 +24,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//if err := pca.SetPwmFreq(300); err != nil {
+	//	if err := pca.SetPwmFreq(700); err != nil {
 	//		log.Fatal(err)
 	//	}
 
+	// https://github.com/google/periph/blob/master/conn/gpio/gpio.go read this
 	// 400 turns on gogo juice. this is dangerous when on a makeshift test stand
-	if err := pca.SetAllPwm(400, 600); err != nil {
+	if err := pca.SetAllPwm(200, 0); err != nil {
 		log.Fatal(err)
 	}
 	//	time.Sleep(2 * time.Second)
