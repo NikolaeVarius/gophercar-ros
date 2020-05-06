@@ -23,29 +23,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	//	if err := pca.SetPwmFreq(700); err != nil {
-	//		log.Fatal(err)
-	//	}
+	// Channel 1 = Steering
+	if err := pca.SetPwm(1, 0, 300); err != nil {
+		log.Fatal(err)
+	}
 
 	// https://github.com/google/periph/blob/master/conn/gpio/gpio.go read this
 	// 400 turns on gogo juice. this is dangerous when on a makeshift test stand
+	// Placeholder for testing throttle
 
-	if err := pca.SetAllPwm(400, 700); err != nil {
-		log.Fatal(err)
-	}
-	sum := 0
-	for i := 0; i < 10; i++ {
-		log.Info(i)
-		if err := pca.SetAllPwm(i*100, 0); err != nil {
-			log.Fatal(err)
-		}
-
-	}
-
-	//	time.Sleep(2 * time.Second)
-	//	if err := pca.SetAllPwm(500, 500); err != nil {
-	//		log.Fatal(err)
-	//	}
+	//if err := pca.SetPwm(0, 0, 300); err != nil {
+	//        log.Fatal(err)
+	//}
 
 }
