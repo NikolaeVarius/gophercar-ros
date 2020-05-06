@@ -24,8 +24,6 @@ func onMessage(msg *sensor_msgs.Joy) {
 }
 
 func main() {
-	// create a node with given name and linked to given master.
-	// master can be reached with an ip or hostname.
 	n, err := goroslib.NewNode(goroslib.NodeConf{
 		Name:       "/goroslib",
 		MasterHost: "donkeycar",
