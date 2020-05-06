@@ -1,5 +1,5 @@
-# donkeycar-ros
-Bridge donkeycar and ROS. Currently using this with a Jetson nano.
+# gophercar-ros
+Bridge donkeycar with golang and ROS. Currently using this with a Jetson Nano.
 
 
 
