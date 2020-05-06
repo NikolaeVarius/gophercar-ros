@@ -1,2 +1,2 @@
 - setup-file:
-    local-name: /home/jkim/catkin_ws/src/donkeycar-ros/catkin_ws/install/setup.sh
+    local-name: /home/jkim/code/donkeycar-ros/catkin_ws/install/setup.sh

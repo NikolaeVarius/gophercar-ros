@@ -1,2 +1,2 @@
-
--DCATKIN_DEVEL_PREFIX=/home/jkim/catkin_ws/src/donkeycar-ros/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/jkim/catkin_ws/src/donkeycar-ros/catkin_ws/install -G Unix Makefiles
+gscam:video_stream_opencv
+-DCATKIN_DEVEL_PREFIX=/home/jkim/code/donkeycar-ros/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/jkim/code/donkeycar-ros/catkin_ws/install -G Unix Makefiles
