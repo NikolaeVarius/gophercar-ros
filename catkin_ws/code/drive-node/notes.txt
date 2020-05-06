@@ -10,6 +10,8 @@ all,400,400 = relaxed
 all,400,450 = right
 all,450,450 = relaxed
 all,400,500 = left, hard right
+all,400,600 = hard right
+all,400,700 = reset
 all,450,550 = left, hard right
 all,500,500 = nothing
 all,500,800 - reset??
