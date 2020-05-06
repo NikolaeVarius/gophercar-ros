@@ -8,7 +8,14 @@ import (
 	"github.com/aler9/goroslib/msgs/sensor_msgs"
 )
 
-//type JoyEvent
+//var subTopic *Subscriber
+//var pubTopic *Publisher
+
+type Message struct {
+	msgs.Package `ros:"my_package"`
+	FirstField   msgs.Uint32
+	SecondField  msgs.String
+}
 
 func onMessage(msg *sensor_msgs.Joy) {
 	fmt.Printf("Incoming: %+v\n", msg)
@@ -35,7 +42,7 @@ func main() {
 	defer n.Close()
 
 	// create a subscriber
-	sub, err := goroslib.NewSubscriber(goroslib.SubscriberConf{
+	subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{
 		Node:     n,
 		Topic:    "/joy",
 		Callback: onMessage,
@@ -43,10 +50,30 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Print("Connected to topic")
-	defer sub.Close()
+	fmt.Print("Connected to subscriber topic")
+	defer subTopic.Close()
+
+	msg := &Message{
+		FirstField:  3,
+		SecondField: "test message",
+	}
+	pubTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
+		Node:  n,
+		Topic: "/joy2",
+		Msg:   msg,
+		Latch: false,
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Print("Connected to publisher topic")
+	defer pubTopic.Close()
 
 	// freeze main loop
 	infty := make(chan int)
 	<-infty
 }
+
+//func publish(msg *sensor_msgs.Joy) {
+//
+//}
