@@ -1,23 +1,23 @@
 Determining if the pthread_create exist failed with the following output:
 Change Dir: /home/jkim/code/donkeycar-ros/catkin_ws/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_21bb2/fast"
-/usr/bin/make -f CMakeFiles/cmTC_21bb2.dir/build.make CMakeFiles/cmTC_21bb2.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_27672/fast"
+/usr/bin/make -f CMakeFiles/cmTC_27672.dir/build.make CMakeFiles/cmTC_27672.dir/build
 make[1]: Entering directory '/home/jkim/code/donkeycar-ros/catkin_ws/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_21bb2.dir/CheckSymbolExists.c.o
-/usr/bin/cc    -o CMakeFiles/cmTC_21bb2.dir/CheckSymbolExists.c.o   -c /home/jkim/code/donkeycar-ros/catkin_ws/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
-Linking C executable cmTC_21bb2
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_21bb2.dir/link.txt --verbose=1
-/usr/bin/cc      -rdynamic CMakeFiles/cmTC_21bb2.dir/CheckSymbolExists.c.o  -o cmTC_21bb2 
-CMakeFiles/cmTC_21bb2.dir/CheckSymbolExists.c.o: In function `main':
+Building C object CMakeFiles/cmTC_27672.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_27672.dir/CheckSymbolExists.c.o   -c /home/jkim/code/donkeycar-ros/catkin_ws/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_27672
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_27672.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_27672.dir/CheckSymbolExists.c.o  -o cmTC_27672 
+CMakeFiles/cmTC_27672.dir/CheckSymbolExists.c.o: In function `main':
 CheckSymbolExists.c:(.text+0x14): undefined reference to `pthread_create'
 CheckSymbolExists.c:(.text+0x18): undefined reference to `pthread_create'
 collect2: error: ld returned 1 exit status
-CMakeFiles/cmTC_21bb2.dir/build.make:97: recipe for target 'cmTC_21bb2' failed
-make[1]: *** [cmTC_21bb2] Error 1
+CMakeFiles/cmTC_27672.dir/build.make:97: recipe for target 'cmTC_27672' failed
+make[1]: *** [cmTC_27672] Error 1
 make[1]: Leaving directory '/home/jkim/code/donkeycar-ros/catkin_ws/build/CMakeFiles/CMakeTmp'
-Makefile:126: recipe for target 'cmTC_21bb2/fast' failed
-make: *** [cmTC_21bb2/fast] Error 2
+Makefile:126: recipe for target 'cmTC_27672/fast' failed
+make: *** [cmTC_27672/fast] Error 2
 
 File /home/jkim/code/donkeycar-ros/catkin_ws/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
 /* */
@@ -37,20 +37,20 @@ int main(int argc, char** argv)
 Determining if the function pthread_create exists in the pthreads failed with the following output:
 Change Dir: /home/jkim/code/donkeycar-ros/catkin_ws/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_c7322/fast"
-/usr/bin/make -f CMakeFiles/cmTC_c7322.dir/build.make CMakeFiles/cmTC_c7322.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_33984/fast"
+/usr/bin/make -f CMakeFiles/cmTC_33984.dir/build.make CMakeFiles/cmTC_33984.dir/build
 make[1]: Entering directory '/home/jkim/code/donkeycar-ros/catkin_ws/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_c7322.dir/CheckFunctionExists.c.o
-/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_c7322.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.10/Modules/CheckFunctionExists.c
-Linking C executable cmTC_c7322
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c7322.dir/link.txt --verbose=1
-/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_c7322.dir/CheckFunctionExists.c.o  -o cmTC_c7322 -lpthreads 
+Building C object CMakeFiles/cmTC_33984.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_33984.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.10/Modules/CheckFunctionExists.c
+Linking C executable cmTC_33984
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_33984.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_33984.dir/CheckFunctionExists.c.o  -o cmTC_33984 -lpthreads 
 /usr/bin/ld: cannot find -lpthreads
 collect2: error: ld returned 1 exit status
-CMakeFiles/cmTC_c7322.dir/build.make:97: recipe for target 'cmTC_c7322' failed
-make[1]: *** [cmTC_c7322] Error 1
+CMakeFiles/cmTC_33984.dir/build.make:97: recipe for target 'cmTC_33984' failed
+make[1]: *** [cmTC_33984] Error 1
 make[1]: Leaving directory '/home/jkim/code/donkeycar-ros/catkin_ws/build/CMakeFiles/CMakeTmp'
-Makefile:126: recipe for target 'cmTC_c7322/fast' failed
-make: *** [cmTC_c7322/fast] Error 2
+Makefile:126: recipe for target 'cmTC_33984/fast' failed
+make: *** [cmTC_33984/fast] Error 2
 
 

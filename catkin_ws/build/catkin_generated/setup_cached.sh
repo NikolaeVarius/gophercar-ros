@@ -12,6 +12,6 @@ export LD_LIBRARY_PATH="/home/jkim/code/donkeycar-ros/catkin_ws/devel/lib:/home/
 export PATH="/opt/ros/melodic/bin:/usr/local/cuda/bin:/home/jkim/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
 export PKG_CONFIG_PATH="/home/jkim/code/donkeycar-ros/catkin_ws/devel/lib/pkgconfig:$PKG_CONFIG_PATH"
 export PWD="/home/jkim/code/donkeycar-ros/catkin_ws/build"
-export PYTHONPATH="/home/jkim/catkin_ws/devel/lib/python2.7/dist-packages:/opt/ros/melodic/lib/python2.7/dist-packages:/usr/lib/python3.6/dist-packages"
+export PYTHONPATH="/home/jkim/code/donkeycar-ros/catkin_ws/devel/lib/python2.7/dist-packages:/home/jkim/catkin_ws/devel/lib/python2.7/dist-packages:/opt/ros/melodic/lib/python2.7/dist-packages:/usr/lib/python3.6/dist-packages"
 export ROSLISP_PACKAGE_DIRECTORIES="/home/jkim/code/donkeycar-ros/catkin_ws/devel/share/common-lisp:$ROSLISP_PACKAGE_DIRECTORIES"
 export ROS_PACKAGE_PATH="/home/jkim/code/donkeycar-ros/catkin_ws/src:$ROS_PACKAGE_PATH"
