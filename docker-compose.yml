@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+    grafana:
+        image: grafana/grafana:6.7.3
+        container_name: grafana
+        ports:
+            - "3000:3000"
+            # build:
+            # context: ./
+            # dockerfile: Dockerfile
+        environment:
+            - GF_INSTALL_PLUGINS=grafana-piechart-panel
