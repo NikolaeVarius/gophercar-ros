@@ -1,0 +1,30 @@
+{
+    "name": "statsdcc",
+    "use_metric_type_prefix": false,
+    "add_fqdn_prefix": false,
+    "servers": {
+        "udp": {
+            "port": 8125,
+            "threads": 1
+        },
+        "ros": {
+            "node_name": "statsdcc"
+        },
+        "http": {
+            "port": 9005
+        }
+    },
+    "frequency": 60,
+    "workers": 1,
+    "log_level": "info",
+    "backends": {
+        "stdout": true,
+        "carbon": [
+            {
+                "shard": "1",
+                "host": "localhost",
+                "port": 2003
+            }
+        ]
+    }
+}
