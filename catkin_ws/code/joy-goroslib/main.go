@@ -6,6 +6,7 @@ import (
 	"github.com/aler9/goroslib/msgs"
 	"github.com/aler9/goroslib/msgs/geometry_msgs"
 	"github.com/aler9/goroslib/msgs/sensor_msgs"
+        "gopkg.in/alexcesaro/statsd.v2"
 )
 
 //var subTopic *Subscriber
