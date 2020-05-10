@@ -8,6 +8,23 @@ import (
 	//	"time"
 )
 
+// Steering Angle Parameters
+const MAX_LEFT ANGLE = 0
+const MAX_RIGHT_ANGLE = 0
+const MAX_LEFT_PULSE = 0
+const MAX_RIGHT_PURSE = 0
+
+
+// Throttle Paramters
+const STOP_PULSE = 0
+const MIN_THROTTLE = 0 // maybe should just use STOP_PULSE?
+const MAX_THROTTLE = 0
+const MIN_THROTTLE_PULSE = 0
+const MAX_THROTTLE_PULSE = 0
+const THROTTLE_CHANNEL = 0
+const THROTTLE_STEP = 10
+
+
 func main() {
 	_, err := host.Init()
 	if err != nil {
