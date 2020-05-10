@@ -6,17 +6,17 @@ import (
 	"github.com/aler9/goroslib/msgs"
 	"github.com/aler9/goroslib/msgs/geometry_msgs"
 	"github.com/aler9/goroslib/msgs/sensor_msgs"
-        "gopkg.in/alexcesaro/statsd.v2"
+//        "gopkg.in/alexcesaro/statsd.v2"
 )
 
-//var subTopic *Subscriber
-//var pubTopic *Publisher
+var subTopic *goroslib.Subscriber
+var pubTopic *goroslib.Publisher
 
-type Message struct {
-	msgs.Package `ros:"my_package"`
-	FirstField   msgs.Uint32
-	SecondField  msgs.String
-}
+//type Message struct {
+//	msgs.Package `ros:"my_package"`
+//	LinearX   msgs.float64
+//	LinearY   msgs.float64
+//}
 
 func onMessage(msg *sensor_msgs.Joy) {
 	fmt.Printf("Incoming: %+v\n", msg)
@@ -25,7 +25,11 @@ func onMessage(msg *sensor_msgs.Joy) {
 	linearVector := geometry_msgs.Vector3{X: x_float64, Y: y_float64}
 	rawMove := geometry_msgs.Twist{Linear: linearVector, Angular: linearVector}
 	stampedMove := geometry_msgs.TwistStamped{Header: msg.Header, Twist: rawMove}
-	fmt.Printf("Outgoing: %+v\n", stampedMove)
+	
+	publishMessage(stampedMove)
+        fmt.Println("Handled Message")
+	return
+	//fmt.Printf("Outgoing: %+v\n", stampedMove)
 	//fmt.Printf(msg.Header)
 	//fmt.Printf(msg.Axes)
 	//fmt.Printf(msg.Buttons)
@@ -39,7 +43,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Print("Connected to Master")
+	fmt.Println("Connected to Master")
 	defer n.Close()
 
 	// create a subscriber
@@ -51,23 +55,20 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Print("Connected to subscriber topic")
+	fmt.Println("Connected to Subscriber Topic")
+
 	defer subTopic.Close()
 
-	msg := &Message{
-		FirstField:  3,
-		SecondField: "test message",
-	}
 	pubTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
 		Node:  n,
-		Topic: "/joy2",
-		Msg:   msg,
+		Topic: "/actuator",
+		Msg:   &sensor_msgs.Joy{},
 		Latch: false,
 	})
 	if err != nil {
 		panic(err)
 	}
-	fmt.Print("Connected to publisher topic")
+	fmt.Println("Connected to Publisher Topic")
 	defer pubTopic.Close()
 
 	// freeze main loop
@@ -75,6 +76,9 @@ func main() {
 	<-infty
 }
 
-//func publish(msg *sensor_msgs.Joy) {
-//
-//}
+func publishMessage(msg geometry_msgs.TwistStamped) {
+    fmt.Println("Publishing")
+    pubTopic.Write(msg)
+    fmt.Println("Done")
+    return
+}
