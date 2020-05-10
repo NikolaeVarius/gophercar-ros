@@ -37,3 +37,23 @@ func main() {
 	//}
 
 }
+
+
+// Translate from input to throttle control pwm values
+func setThrottle(throttle float64) {
+    throttlePWMVal := getThrottlePWMVal()
+
+}
+
+// Translate from intput to direction pwm values
+func setSteering(steering float64) {
+    steeringPWMVal := getSteeringPWMVal()
+}
+
+func getThrottlePWMVal(val float64) {
+
+}
+
+func getSteeringPWMVal(val float64) {
+}
+
