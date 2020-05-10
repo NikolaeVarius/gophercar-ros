@@ -55,6 +55,35 @@ func main() {
 
 }
 
+// Joystick Events Handler
+func joystickROSNode() {
+        n, err := goroslib.NewNode(goroslib.NodeConf{
+                Name:       "/goroslib",
+                MasterHost: "donkeycar",
+        })
+        if err != nil {
+                panic(err)
+        }
+        fmt.Print("Connected to Master")
+        defer n.Close()
+
+        // create a subscriber
+        subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{
+                Node:     n,
+                Topic:    "/joy",
+                Callback: onMessage,
+        })
+        if err != nil {
+                panic(err)
+        }
+        fmt.Print("Connected to subscriber topic")
+        defer subTopic.Close()
+
+
+}
+
+
+
 
 // Translate from input to throttle control pwm values
 func setThrottle(throttle float64) {
