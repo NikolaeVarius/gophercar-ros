@@ -1,6 +1,12 @@
 # gophercar-ros
 Bridge donkeycar with golang and ROS. Currently using this with a Jetson Nano.
 
+## Using
+
+roscore
+
+### Start joystick(PS4 Dualshock) Handler
+rosrun joy joy_node
 
 
 ## Dependencies
