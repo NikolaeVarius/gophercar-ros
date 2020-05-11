@@ -47,10 +47,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	
+        // Channel 0 = Throttle
+	// Initialize PWM throttle at a STOPPED Value
+        if err := pca.SetPwm(0, 0, 300); err != nil {
+              log.Fatal(err)
+        }
+
 	// Channel 1 = Steering
-	if err := pca.SetPwm(1, 0, 300); err != nil {
-		log.Fatal(err)
-	}
+	// Initialize PWM Steering at a Neutral Value
+        if err := pca.SetPwm(1, 0, 300); err != nil {
+              log.Fatal(err)
+        }
 
 	// https://github.com/google/periph/blob/master/conn/gpio/gpio.go read this
 	// 400 turns on gogo juice. this is dangerous when on a makeshift test stand
@@ -60,7 +68,7 @@ func main() {
 	//        log.Fatal(err)
 	//}
         n, err := goroslib.NewNode(goroslib.NodeConf{
-                Name:       "/actuator",
+                Name:       "/gophercar-actuator",
                 MasterHost: "donkeycar",
         })
         if err != nil {
