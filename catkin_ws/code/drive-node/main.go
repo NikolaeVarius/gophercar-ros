@@ -2,14 +2,21 @@ package main
 
 import (
 	"log"
+	"fmt"
 	"periph.io/x/periph/conn/i2c/i2creg"
 	"periph.io/x/periph/experimental/devices/pca9685"
 	"periph.io/x/periph/host"
+
+        "github.com/aler9/goroslib"
+        "github.com/aler9/goroslib/msgs"
+        "github.com/aler9/goroslib/msgs/geometry_msgs"
+        "github.com/aler9/goroslib/msgs/sensor_msgs"
+
 	//	"time"
 )
 
 // Steering Angle Parameters
-const MAX_LEFT ANGLE = 0
+const MAX_LEFT_ANGLE = 0
 const MAX_RIGHT_ANGLE = 0
 const MAX_LEFT_PULSE = 0
 const MAX_RIGHT_PURSE = 0
@@ -52,13 +59,36 @@ func main() {
 	//if err := pca.SetPwm(0, 0, 300); err != nil {
 	//        log.Fatal(err)
 	//}
+        n, err := goroslib.NewNode(goroslib.NodeConf{
+                Name:       "/actuator",
+                MasterHost: "donkeycar",
+        })
+        if err != nil {
+                panic(err)
+        }
+        fmt.Print("Connected to Master")
+        defer n.Close()
 
+        // create a subscriber
+        subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{
+                Node:     n,
+                Topic:    "/actuator",
+                Callback: onMessage,
+        })
+        if err != nil {
+                panic(err)
+        }
+        fmt.Print("Connected to subscriber topic")
+        defer subTopic.Close()
+
+        infty := make(chan int)
+        <-infty
 }
 
 // Joystick Events Handler
 func joystickROSNode() {
         n, err := goroslib.NewNode(goroslib.NodeConf{
-                Name:       "/goroslib",
+                Name:       "/actuator",
                 MasterHost: "donkeycar",
         })
         if err != nil {
@@ -78,28 +108,48 @@ func joystickROSNode() {
         }
         fmt.Print("Connected to subscriber topic")
         defer subTopic.Close()
-
-
+	
 }
 
 
 
 
 // Translate from input to throttle control pwm values
-func setThrottle(throttle float64) {
-    throttlePWMVal := getThrottlePWMVal()
-
+func setThrottle(throttle float64) error {
+    throttlePWMVal := getThrottlePWMVal(throttle)
+    fmt.Println(throttlePWMVal)
+    return nil
 }
 
 // Translate from intput to direction pwm values
-func setSteering(steering float64) {
-    steeringPWMVal := getSteeringPWMVal()
+func setSteering(steering float64) error {
+    steeringPWMVal := getSteeringPWMVal(steering)
+    fmt.Println(steeringPWMVal)
+    return nil
 }
 
-func getThrottlePWMVal(val float64) {
-
+func getThrottlePWMVal(val float64) float64 {
+    return 0
 }
 
-func getSteeringPWMVal(val float64) {
+func getSteeringPWMVal(val float64) float64 {
+    return 0
 }
+
+func onMessage(msg *sensor_msgs.Joy) {
+        fmt.Printf("Incoming: %+v\n", msg)
+        x_float64 := msgs.Float64(float64(msg.Axes[0]))
+        y_float64 := msgs.Float64(float64(msg.Axes[1]))
+        linearVector := geometry_msgs.Vector3{X: x_float64, Y: y_float64}
+        rawMove := geometry_msgs.Twist{Linear: linearVector, Angular: linearVector}
+        stampedMove := geometry_msgs.TwistStamped{Header: msg.Header, Twist: rawMove}
+
+        //fmt.Println("Handled Message")
+        fmt.Printf("Outgoing: %+v\n", stampedMove)
+        //fmt.Printf(msg.Header)
+        //fmt.Printf(msg.Axes)
+        //fmt.Printf(msg.Buttons)
+	return
+}
+
 

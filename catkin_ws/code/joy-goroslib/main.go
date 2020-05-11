@@ -62,7 +62,7 @@ func main() {
 	pubTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
 		Node:  n,
 		Topic: "/actuator",
-		Msg:   &sensor_msgs.Joy{},
+		Msg:   &geometry_msgs.TwistStamped{},
 		Latch: false,
 	})
 	if err != nil {
