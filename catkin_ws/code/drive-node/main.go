@@ -8,9 +8,9 @@ import (
 	"periph.io/x/periph/host"
 
         "github.com/aler9/goroslib"
-        "github.com/aler9/goroslib/msgs"
+       // "github.com/aler9/goroslib/msgs"
         "github.com/aler9/goroslib/msgs/geometry_msgs"
-        "github.com/aler9/goroslib/msgs/sensor_msgs"
+       // "github.com/aler9/goroslib/msgs/sensor_msgs"
 
 	//	"time"
 )
@@ -78,7 +78,7 @@ func main() {
         if err != nil {
                 panic(err)
         }
-        fmt.Print("Connected to subscriber topic")
+        fmt.Println("Connected to subscriber topic")
         defer subTopic.Close()
 
         infty := make(chan int)
@@ -136,16 +136,16 @@ func getSteeringPWMVal(val float64) float64 {
     return 0
 }
 
-func onMessage(msg *sensor_msgs.Joy) {
-        fmt.Printf("Incoming: %+v\n", msg)
-        x_float64 := msgs.Float64(float64(msg.Axes[0]))
-        y_float64 := msgs.Float64(float64(msg.Axes[1]))
-        linearVector := geometry_msgs.Vector3{X: x_float64, Y: y_float64}
-        rawMove := geometry_msgs.Twist{Linear: linearVector, Angular: linearVector}
-        stampedMove := geometry_msgs.TwistStamped{Header: msg.Header, Twist: rawMove}
+func onMessage(msg *geometry_msgs.TwistStamped) {
+        fmt.Println("Incoming: %+v\n", msg)
+        //x_float64 := msgs.Float64(float64(msg.Axes[0]))
+        //y_float64 := msgs.Float64(float64(msg.Axes[1]))
+        //linearVector := geometry_msgs.Vector3{X: x_float64, Y: y_float64}
+        //rawMove := geometry_msgs.Twist{Linear: linearVector, Angular: linearVector}
+        //stampedMove := geometry_msgs.TwistStamped{Header: msg.Header, Twist: rawMove}
 
         //fmt.Println("Handled Message")
-        fmt.Printf("Outgoing: %+v\n", stampedMove)
+        //fmt.Printf("Outgoing: %+v\n", stampedMove)
         //fmt.Printf(msg.Header)
         //fmt.Printf(msg.Axes)
         //fmt.Printf(msg.Buttons)
