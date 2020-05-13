@@ -6,7 +6,7 @@ import (
 	"github.com/aler9/goroslib/msgs"
 	"github.com/aler9/goroslib/msgs/geometry_msgs"
 	"github.com/aler9/goroslib/msgs/sensor_msgs"
-	//        "gopkg.in/alexcesaro/statsd.v2"
+        "gopkg.in/alexcesaro/statsd.v2"
 )
 
 var subTopic *goroslib.Subscriber
@@ -24,6 +24,13 @@ func covertJoyToTwistStamped(msg *sensor_msgs.Joy) geometry_msgs.TwistStamped {
 
 func main() {
 	joyMessages := make(chan *sensor_msgs.Joy, 100)
+
+	c, err := statsd.New() // Connect to the UDP port 8125 by default.
+	if err != nil {
+	  fmt.Println(err)
+	}
+	defer c.Close()
+
 
 	n, err := goroslib.NewNode(goroslib.NodeConf{
 		Name:       "/goroslib",
@@ -72,6 +79,7 @@ func main() {
 }
 
 func publishMessage(msg geometry_msgs.TwistStamped) {
+	//c.Gauge("msg", msg)
 	pubTopic.Write(&msg)
 	return
 }
