@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+//	"time"
 	"github.com/aler9/goroslib"
 	"github.com/aler9/goroslib/msgs"
 	"github.com/aler9/goroslib/msgs/geometry_msgs"
@@ -26,10 +27,7 @@ func onMessage(msg *sensor_msgs.Joy) {
 	rawMove := geometry_msgs.Twist{Linear: linearVector, Angular: linearVector}
 	stampedMove := geometry_msgs.TwistStamped{Header: msg.Header, Twist: rawMove}
 	fmt.Printf("Incoming: %+v\n", stampedMove)
- 
-	pubTopic.Write("test")
-
-//	publishMessage(stampedMove)
+	pubTopic.Write(rawMove)
         fmt.Println("Handled Message")
 //	return
 	//fmt.Printf("Outgoing: %+v\n", stampedMove)
@@ -39,6 +37,9 @@ func onMessage(msg *sensor_msgs.Joy) {
 }
 
 func main() {
+
+	//messages := make(chan geometry_msgs.TwistStamped)
+	
 	n, err := goroslib.NewNode(goroslib.NodeConf{
 		Name:       "/goroslib",
 		MasterHost: "donkeycar",
@@ -48,9 +49,9 @@ func main() {
 	}
 	fmt.Println("Connected to Master")
 	defer n.Close()
-
+    
 	// create a subscriber
-	subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{
+	subTopic, err = goroslib.NewSubscriber(goroslib.SubscriberConf{
 		Node:     n,
 		Topic:    "/joy",
 		Callback: onMessage,
@@ -62,7 +63,7 @@ func main() {
 
 	defer subTopic.Close()
 
-	pubTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
+	pubTopic, err = goroslib.NewPublisher(goroslib.PublisherConf{
 		Node:  n,
 		Topic: "/actuator",
 		Msg:   &geometry_msgs.TwistStamped{},
@@ -73,15 +74,16 @@ func main() {
 	}
 	fmt.Println("Connected to Publisher Topic")
 	defer pubTopic.Close()
+	
+	
 
-	// freeze main loop
 	infty := make(chan int)
 	<-infty
 }
 
-func publishMessage(msg geometry_msgs.TwistStamped) {
-    fmt.Println("Publishing")
-    pubTopic.Write(msg)
-    fmt.Println("Done")
-    return
-}
+//func publishMessage(msg geometry_msgs.TwistStamped) {
+//    fmt.Println("Publishing")
+//    pubTopic.Write(msg)
+//    fmt.Println("Done")
+//    return
+//}
