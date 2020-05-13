@@ -93,33 +93,9 @@ func main() {
         <-infty
 }
 
-// Joystick Events Handler
-func joystickROSNode() {
-        n, err := goroslib.NewNode(goroslib.NodeConf{
-                Name:       "/actuator",
-                MasterHost: "donkeycar",
-        })
-        if err != nil {
-                panic(err)
-        }
-        fmt.Print("Connected to Master")
-        defer n.Close()
-
-        // create a subscriber
-        subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{
-                Node:     n,
-                Topic:    "/joy",
-                Callback: onMessage,
-        })
-        if err != nil {
-                panic(err)
-        }
-        fmt.Print("Connected to subscriber topic")
-        defer subTopic.Close()
-	
+func convertStampedTwistedToAngle() {
+    return
 }
-
-
 
 
 // Translate from input to throttle control pwm values
@@ -143,21 +119,3 @@ func getThrottlePWMVal(val float64) float64 {
 func getSteeringPWMVal(val float64) float64 {
     return 0
 }
-
-func onMessage(msg *geometry_msgs.TwistStamped) {
-        fmt.Println("Incoming: %+v\n", msg)
-        //x_float64 := msgs.Float64(float64(msg.Axes[0]))
-        //y_float64 := msgs.Float64(float64(msg.Axes[1]))
-        //linearVector := geometry_msgs.Vector3{X: x_float64, Y: y_float64}
-        //rawMove := geometry_msgs.Twist{Linear: linearVector, Angular: linearVector}
-        //stampedMove := geometry_msgs.TwistStamped{Header: msg.Header, Twist: rawMove}
-
-        //fmt.Println("Handled Message")
-        //fmt.Printf("Outgoing: %+v\n", stampedMove)
-        //fmt.Printf(msg.Header)
-        //fmt.Printf(msg.Axes)
-        //fmt.Printf(msg.Buttons)
-	return
-}
-
-
