@@ -11,7 +11,6 @@ import (
 
 var subTopic *goroslib.Subscriber
 var pubTopic *goroslib.Publisher
-
 func covertJoyToTwistStamped(msg *sensor_msgs.Joy) geometry_msgs.TwistStamped {
 	fmt.Println("Incoming: %+v\n", msg)
 	x_float64 := msgs.Float64(float64(msg.Axes[0]))
@@ -70,8 +69,10 @@ func main() {
 
 	go func() {
 		for x := range joyMessages {
-			publishMessage(covertJoyToTwistStamped(x))
+		  c.Increment("foo.counter")
+		  publishMessage(covertJoyToTwistStamped(x))
 		}
+
 	}()
 
 	infty := make(chan int)
@@ -79,7 +80,6 @@ func main() {
 }
 
 func publishMessage(msg geometry_msgs.TwistStamped) {
-	//c.Gauge("msg", msg)
 	pubTopic.Write(&msg)
 	return
 }
