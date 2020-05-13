@@ -18,9 +18,6 @@ type Message struct {
 	SecondField  msgs.String
 }
 
-func onMessage(msg *sensor_msgs.Joy) {
-}
-
 func main() {
 	n, err := goroslib.NewNode(goroslib.NodeConf{
 		Name:       "/goroslib",
@@ -29,14 +26,17 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Print("Connected to Master")
+	fmt.Println("Connected to Master")
 	defer n.Close()
 
-	// create a subscriber
 	subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{
 		Node:     n,
-		Topic:    "/joy",
-		Callback: onMessage,
+		Topic:    "/stats_aggregator",
+		// need to figure out typing for these stats
+	        Callback: func(msg stats) {
+		    stats <- msg
+                },
+,
 	})
 
 	if err != nil {
