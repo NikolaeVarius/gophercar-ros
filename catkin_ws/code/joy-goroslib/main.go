@@ -19,21 +19,14 @@ var pubTopic *goroslib.Publisher
 //	LinearY   msgs.float64
 //}
 
-func onMessage(msg *sensor_msgs.Joy) {
+func covertJoyToTwistStamped(msg *sensor_msgs.Joy) geometry_msgs.TwistStamped  {
 	fmt.Println("Incoming: %+v\n", msg)
 	x_float64 := msgs.Float64(float64(msg.Axes[0]))
 	y_float64 := msgs.Float64(float64(msg.Axes[1]))
 	linearVector := geometry_msgs.Vector3{X: x_float64, Y: y_float64}
 	rawMove := geometry_msgs.Twist{Linear: linearVector, Angular: linearVector}
 	stampedMove := geometry_msgs.TwistStamped{Header: msg.Header, Twist: rawMove}
-	fmt.Printf("Incoming: %+v\n", stampedMove)
-	pubTopic.Write(rawMove)
-        fmt.Println("Handled Message")
-//	return
-	//fmt.Printf("Outgoing: %+v\n", stampedMove)
-	//fmt.Printf(msg.Header)
-	//fmt.Printf(msg.Axes)
-	//fmt.Printf(msg.Buttons)
+	return stampedMove
 }
 
 func main() {
@@ -81,7 +74,7 @@ func main() {
 	
     go func() {
         for x := range joyMessages  {
-            fmt.Println(x)
+            publishMessage(covertJoyToTwistStamped(x))
         }
     }()
 
@@ -89,9 +82,9 @@ func main() {
 	<-infty
 }
 
-//func publishMessage(msg geometry_msgs.TwistStamped) {
-//    fmt.Println("Publishing")
-//    pubTopic.Write(msg)
-//    fmt.Println("Done")
-//    return
-//}
+func publishMessage(msg geometry_msgs.TwistStamped) {
+    fmt.Println("Publishing")
+    pubTopic.Write(&msg)
+    fmt.Println("Done")
+    return
+}
