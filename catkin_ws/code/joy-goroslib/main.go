@@ -38,8 +38,9 @@ func onMessage(msg *sensor_msgs.Joy) {
 
 func main() {
 
-	//messages := make(chan geometry_msgs.TwistStamped)
-	
+	//stampedTwistMessages := make(chan *geometry_msgs.TwistStamped, 100)
+	joyMessages := make(chan *sensor_msgs.Joy, 100)
+
 	n, err := goroslib.NewNode(goroslib.NodeConf{
 		Name:       "/goroslib",
 		MasterHost: "donkeycar",
@@ -54,7 +55,10 @@ func main() {
 	subTopic, err = goroslib.NewSubscriber(goroslib.SubscriberConf{
 		Node:     n,
 		Topic:    "/joy",
-		Callback: onMessage,
+		Callback: func(msg *sensor_msgs.Joy) {
+	          //fmt.Println("here")
+		  joyMessages <- msg
+		},
 	})
 	if err != nil {
 		panic(err)
@@ -75,7 +79,11 @@ func main() {
 	fmt.Println("Connected to Publisher Topic")
 	defer pubTopic.Close()
 	
-	
+    go func() {
+        for x := range joyMessages  {
+            fmt.Println(x)
+        }
+    }()
 
 	infty := make(chan int)
 	<-infty
