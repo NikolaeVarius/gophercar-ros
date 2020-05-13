@@ -1,13 +1,33 @@
 version: "3"
 
 services:
-    grafana:
-        image: grafana/grafana:6.7.3
-        container_name: grafana
-        ports:
-            - "3000:3000"
-            # build:
-            # context: ./
-            # dockerfile: Dockerfile
-        environment:
-            - GF_INSTALL_PLUGINS=grafana-piechart-panel
+  graphite:
+    image: graphiteapp/graphite-statsd:1.1.7-2
+    container_name: graphite
+    restart: always
+    networks:
+      - monitoring
+    ports:
+        - "8080:80"
+        - "8125:8125/udp"
+        - "8126:8126"
+        - "2003:2003"
+        - "2004:2004"
+
+  grafana:
+      image: grafana/grafana:6.7.3
+      container_name: grafana
+      restart: always
+      ports:
+          - "3000:3000"
+          # build:
+          # context: ./
+          # dockerfile: Dockerfile
+      networks:
+        - monitoring
+      environment:
+          - GF_INSTALL_PLUGINS=grafana-piechart-panel
+          #- GF_SECURITY_ADMIN_PASSWORD=password
+networks:
+  monitoring:
+    driver: bridge
