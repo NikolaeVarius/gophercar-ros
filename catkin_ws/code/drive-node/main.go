@@ -67,6 +67,8 @@ func main() {
 	//if err := pca.SetPwm(0, 0, 300); err != nil {
 	//        log.Fatal(err)
 	//}
+        actuatorMessages := make(chan *geometry_msgs.TwistStamped, 100)
+
         n, err := goroslib.NewNode(goroslib.NodeConf{
                 Name:       "/gophercar-actuator",
                 MasterHost: "donkeycar",
@@ -81,13 +83,22 @@ func main() {
         subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{
                 Node:     n,
                 Topic:    "/actuator",
-                Callback: onMessage,
-        })
+                Callback: func(msg  *geometry_msgs.TwistStamped) {
+                        actuatorMessages <- msg
+                },
+	})
         if err != nil {
                 panic(err)
         }
         fmt.Println("Connected to subscriber topic")
         defer subTopic.Close()
+
+        go func() {
+                for x := range actuatorMessages {
+		  fmt.Println(x)
+                }
+
+        }()
 
         infty := make(chan int)
         <-infty
