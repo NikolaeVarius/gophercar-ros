@@ -6,9 +6,9 @@ import (
 	"periph.io/x/periph/conn/i2c/i2creg"
 	"periph.io/x/periph/experimental/devices/pca9685"
 	"periph.io/x/periph/host"
-
+	"periph.io/x/periph/conn/gpio"
         "github.com/aler9/goroslib"
-       // "github.com/aler9/goroslib/msgs"
+        "github.com/aler9/goroslib/msgs"
         "github.com/aler9/goroslib/msgs/geometry_msgs"
        // "github.com/aler9/goroslib/msgs/sensor_msgs"
 
@@ -18,8 +18,6 @@ import (
 // Steering Angle Parameters
 const MAX_LEFT_ANGLE = 0
 const MAX_RIGHT_ANGLE = 0
-const MAX_LEFT_PULSE = 0
-const MAX_RIGHT_PURSE = 0
 const MAX_LEFT_PULSE = 400
 const MAX_RIGHT_PULSE = 200
 const NEUTRAL_PULSE = 300
@@ -33,7 +31,7 @@ const MIN_THROTTLE_PULSE = 0
 const MAX_THROTTLE_PULSE = 0
 const THROTTLE_CHANNEL = 0
 const THROTTLE_STEP = 10
-
+var pca *pca9685.Dev
 
 func main() {
 	_, err := host.Init()
@@ -100,6 +98,10 @@ func main() {
                 for x := range actuatorMessages {
 		  fmt.Println(x.Header)
 		  fmt.Println(x.Twist.Linear.X)
+		  err  := setSteering(x.Twist.Linear.X)
+		  if err != nil {
+		    panic(err)
+		  }
 		  fmt.Println(x.Twist.Linear.Y)
 		  fmt.Println(x.Twist.Linear.Z)
 		  fmt.Println(x.Twist.Angular)
@@ -117,23 +119,47 @@ func convertStampedTwistedToAngle() {
 
 
 // Translate from input to throttle control pwm values
-func setThrottle(throttle float64) error {
+func setThrottle(throttle msgs.Float64) error {
     throttlePWMVal := getThrottlePWMVal(throttle)
     fmt.Println(throttlePWMVal)
     return nil
 }
 
 // Translate from intput to direction pwm values
-func setSteering(steering float64) error {
-    steeringPWMVal := getSteeringPWMVal(steering)
-    fmt.Println(steeringPWMVal)
+func setSteering(steering msgs.Float64) error {
+    val := getSteeringPWMVal(steering)
+    fmt.Println(val)
+    steeringPWMVal,dutyErr := gpio.ParseDuty(string(val))
+    if dutyErr != nil {
+      return dutyErr
+    }
+
+    if err := pca.SetPwm(1, 0, steeringPWMVal); err != nil {
+      return err
+    }
     return nil
 }
 
-func getThrottlePWMVal(val float64) float64 {
+func getThrottlePWMVal(val msgs.Float64) int{
     return 0
 }
 
-func getSteeringPWMVal(val float64) float64 {
-    return 0
+func getSteeringPWMVal(val msgs.Float64) int {
+  var pwmVal int
+  if (val < 0) {
+    fmt.Println("go right")
+    pwmVal = MAX_RIGHT_PULSE
+  } 
+  
+  if (val > 0) {
+    fmt.Println("go left")
+    pwmVal = MAX_LEFT_PULSE
+  }
+
+  if (val == 0) {
+    fmt.Println("stay straight")
+    pwmVal = NEUTRAL_PULSE
+  }
+
+  return pwmVal
 }
