@@ -20,6 +20,9 @@ const MAX_LEFT_ANGLE = 0
 const MAX_RIGHT_ANGLE = 0
 const MAX_LEFT_PULSE = 0
 const MAX_RIGHT_PURSE = 0
+const MAX_LEFT_PULSE = 400
+const MAX_RIGHT_PULSE = 200
+const NEUTRAL_PULSE = 300
 
 
 // Throttle Paramters
@@ -95,7 +98,11 @@ func main() {
 
         go func() {
                 for x := range actuatorMessages {
-		  fmt.Println(x)
+		  fmt.Println(x.Header)
+		  fmt.Println(x.Twist.Linear.X)
+		  fmt.Println(x.Twist.Linear.Y)
+		  fmt.Println(x.Twist.Linear.Z)
+		  fmt.Println(x.Twist.Angular)
                 }
 
         }()
