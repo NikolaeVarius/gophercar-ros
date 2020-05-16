@@ -48,16 +48,21 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// PWM Freq
+        //if err := pca.SetPwmFreq(60); err != nil {
+       //       log.Fatal(err)
+        //}
 	
         // Channel 0 = Throttle
 	// Initialize PWM throttle at a STOPPED Value
-        if err := pca.SetPwm(0, 0, 300); err != nil {
+        if err := pca.SetPwm(0, 0, STOP_PULSE); err != nil {
               log.Fatal(err)
         }
 
 	// Channel 1 = Steering
 	// Initialize PWM Steering at a Neutral Value
-        if err := pca.SetPwm(1, 0, 300); err != nil {
+        if err := pca.SetPwm(1, 0, NEUTRAL_PULSE); err != nil {
               log.Fatal(err)
         }
 
@@ -98,13 +103,13 @@ func main() {
                 for x := range actuatorMessages {
 		  fmt.Println(x.Header)
 		  fmt.Println(x.Twist.Linear.X)
-		  err  := setSteering(x.Twist.Linear.X)
+		  err := setSteering(x.Twist.Linear.X)
 		  if err != nil {
 		    panic(err)
 		  }
-		  fmt.Println(x.Twist.Linear.Y)
-		  fmt.Println(x.Twist.Linear.Z)
-		  fmt.Println(x.Twist.Angular)
+		  //fmt.Println(x.Twist.Linear.Y)
+		  //fmt.Println(x.Twist.Linear.Z)
+		  //fmt.Println(x.Twist.Angular)
                 }
 
         }()
@@ -129,7 +134,7 @@ func setThrottle(throttle msgs.Float64) error {
 func setSteering(steering msgs.Float64) error {
     val := getSteeringPWMVal(steering)
     fmt.Println(val)
-    steeringPWMVal,dutyErr := gpio.ParseDuty(string(val))
+    steeringPWMVal,dutyErr := gpio.ParseDuty("33%")
     if dutyErr != nil {
       return dutyErr
     }
