@@ -70,7 +70,9 @@ func main() {
 	go func() {
 		for x := range joyMessages {
 		  c.Increment("foo.counter")
-		  publishMessage(covertJoyToTwistStamped(x))
+		  msg := covertJoyToTwistStamped(x)
+		  fmt.Println("Outgoing: %+v\n", msg)
+		  publishMessage(msg)
 		}
 
 	}()
