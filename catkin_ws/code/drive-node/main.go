@@ -106,13 +106,17 @@ func main() {
 		for x := range actuatorMessages {
 			select {
 			case <-ticker.C:
-				fmt.Println(x.Header)
-				fmt.Println(x.Twist.Linear.X)
+				fmt.Println(x)
 
-				err := setSteering(x.Twist.Linear.X)
+				steerErr := setSteering(x.Twist.Linear.X)
 				if err != nil {
-					panic(err)
+					panic(steerErr)
 				}
+                                throttleErr := setThrottle(x.Twist.Linear.Y)
+                                if err != nil {
+                                        panic(throttleErr)
+                                }
+
 				//fmt.Println(x.Twist.Linear.Y)
 				//fmt.Println(x.Twist.Linear.Z)
 				//fmt.Println(x.Twist.Angular)
@@ -139,13 +143,6 @@ func setThrottle(throttle msgs.Float64) error {
 // Translate from intput to direction pwm values
 func setSteering(steering msgs.Float64) error {
 	val := getSteeringPWMVal(steering)
-//	fmt.Println(val)
-	steeringPWMVal, dutyErr := gpio.ParseDuty("100%")
-	if dutyErr != nil {
-		return dutyErr
-	}
-//	fmt.Println(steeringPWMVal)
-
 	if err := pca.SetPwm(1, 0,  gpio.Duty(val)); err != nil {
 		return err
 	}
@@ -153,23 +150,38 @@ func setSteering(steering msgs.Float64) error {
 }
 
 func getThrottlePWMVal(val msgs.Float64) int {
-	return 0
+        var pwmVal int
+	fmt.Println(val)
+        if val < 0 {
+                pwmVal = MAX_THROTTLE_PULSE
+        }
+
+        if val > 0 {
+                pwmVal = MIN_THROTTLE_PULSE
+        }
+
+        if val == 0 {
+                pwmVal = STOP_PULSE
+        }
+
+        return pwmVal
+
 }
 
 func getSteeringPWMVal(val msgs.Float64) int {
 	var pwmVal int
 	if val < 0 {
-		fmt.Println("go right")
+	//	fmt.Println("go right")
 		pwmVal = MAX_RIGHT_PULSE
 	}
 
 	if val > 0 {
-		fmt.Println("go left")
+	//	fmt.Println("go left")
 		pwmVal = MAX_LEFT_PULSE
 	}
 
 	if val == 0 {
-		fmt.Println("stay straight")
+	//	fmt.Println("stay straight")
 		pwmVal = NEUTRAL_PULSE
 	}
 
