@@ -30,6 +30,9 @@ const MAX_THROTTLE_PULSE = 0
 const THROTTLE_CHANNEL = 0
 const THROTTLE_STEP = 10
 
+//type pcaHandler struct {
+//    pca *pca9685.Dev
+//}
 var pca *pca9685.Dev
 
 func main() {
@@ -105,6 +108,7 @@ func main() {
 			case <-ticker.C:
 				fmt.Println(x.Header)
 				fmt.Println(x.Twist.Linear.X)
+
 				err := setSteering(x.Twist.Linear.X)
 				if err != nil {
 					panic(err)
@@ -140,8 +144,9 @@ func setSteering(steering msgs.Float64) error {
 	if dutyErr != nil {
 		return dutyErr
 	}
+	fmt.Println(steeringPWMVal)
 
-	if err := pca.SetPwm(1, 0, steeringPWMVal); err != nil {
+	if err := pca.SetPwm(1, 0, 0x800); err != nil {
 		return err
 	}
 	return nil
