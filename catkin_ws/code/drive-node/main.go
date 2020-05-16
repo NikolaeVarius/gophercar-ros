@@ -46,7 +46,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	pca, err := pca9685.NewI2C(bus, pca9685.I2CAddr)
+	pca, err = pca9685.NewI2C(bus, pca9685.I2CAddr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -139,14 +139,14 @@ func setThrottle(throttle msgs.Float64) error {
 // Translate from intput to direction pwm values
 func setSteering(steering msgs.Float64) error {
 	val := getSteeringPWMVal(steering)
-	fmt.Println(val)
-	steeringPWMVal, dutyErr := gpio.ParseDuty("33%")
+//	fmt.Println(val)
+	steeringPWMVal, dutyErr := gpio.ParseDuty("100%")
 	if dutyErr != nil {
 		return dutyErr
 	}
-	fmt.Println(steeringPWMVal)
+//	fmt.Println(steeringPWMVal)
 
-	if err := pca.SetPwm(1, 0, 0x800); err != nil {
+	if err := pca.SetPwm(1, 0,  gpio.Duty(val)); err != nil {
 		return err
 	}
 	return nil
