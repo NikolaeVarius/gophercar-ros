@@ -28,7 +28,7 @@ const STOP_PULSE = 0
 const MIN_THROTTLE = 0 // maybe should just use STOP_PULSE?
 const MAX_THROTTLE = 0
 const MIN_THROTTLE_PULSE = 0
-const MAX_THROTTLE_PULSE = 400
+const MAX_THROTTLE_PULSE = 500
 const THROTTLE_CHANNEL = 0
 const THROTTLE_STEP = 10
 
@@ -60,7 +60,7 @@ func main() {
 
 	// Channel 0 = Throttle
 	// Initialize PWM throttle at a STOPPED Value
-	if err := pca.SetPwm(0, 0, STOP_PULSE); err != nil {
+	if err := pca.SetPwm(0, 0, 370); err != nil {
 		log.Fatal(err)
 	}
 
