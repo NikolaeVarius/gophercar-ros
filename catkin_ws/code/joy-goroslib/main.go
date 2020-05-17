@@ -4,21 +4,30 @@ import (
 	"fmt"
 	"github.com/aler9/goroslib"
 	"github.com/aler9/goroslib/msgs"
-	"github.com/aler9/goroslib/msgs/geometry_msgs"
+	"github.com/aler9/goroslib/msgs/std_msgs"		
+//	"github.com/aler9/goroslib/msgs/geometry_msgs"
 	"github.com/aler9/goroslib/msgs/sensor_msgs"
         "gopkg.in/alexcesaro/statsd.v2"
 )
 
 var subTopic *goroslib.Subscriber
 var pubTopic *goroslib.Publisher
-func covertJoyToTwistStamped(msg *sensor_msgs.Joy) geometry_msgs.TwistStamped {
-	fmt.Println("Incoming: %+v\n", msg)
-	x_float64 := msgs.Float64(float64(msg.Axes[0]))
-	y_float64 := msgs.Float64(float64(msg.Axes[1]))
-	linearVector := geometry_msgs.Vector3{X: x_float64, Y: y_float64}
-	rawMove := geometry_msgs.Twist{Linear: linearVector, Angular: linearVector}
-	stampedMove := geometry_msgs.TwistStamped{Header: msg.Header, Twist: rawMove}
-	return stampedMove
+
+func covertJoyToStdMessage(msg *sensor_msgs.Joy) std_msgs.Float64MultiArray {
+	var newMsg std_msgs.Float64MultiArray
+	newMsg.Data
+	
+	fmt.Println("Incoming: %#v\n", msg)
+	leftJoyX := msgs.Float64(float64(msg.Axes[0]))
+	leftJoyY := msgs.Float64(float64(msg.Axes[1]))
+	rightJoyX := msgs.Float64(float64(msg.Axes[2]))
+	rightJoyY := msgs.Float64(float64(msg.Axes[3]))
+	newMsg.Data[0] = leftJoyX
+        newMsg.Data[1] = leftJoyY
+	newMsg.Data[2] = rightJoyX
+	newMsg.Data[3] = rightJoyY
+
+	return newMsg
 }
 
 func main() {
@@ -58,7 +67,7 @@ func main() {
 	pubTopic, err = goroslib.NewPublisher(goroslib.PublisherConf{
 		Node:  n,
 		Topic: "/actuator",
-		Msg:   &geometry_msgs.TwistStamped{},
+		Msg:   &std_msgs.Float64MultiArray{},
 		Latch: false,
 	})
 	if err != nil {
@@ -70,7 +79,7 @@ func main() {
 	go func() {
 		for x := range joyMessages {
 		  c.Increment("foo.counter")
-		  msg := covertJoyToTwistStamped(x)
+		  msg := covertJoyToStdMessage(x)
 		  fmt.Println("Outgoing: %+v\n", msg)
 		  publishMessage(msg)
 		}
@@ -81,7 +90,7 @@ func main() {
 	<-infty
 }
 
-func publishMessage(msg geometry_msgs.TwistStamped) {
+func publishMessage(msg std_msgs.Float64MultiArray) {
 	pubTopic.Write(&msg)
 	return
 }
