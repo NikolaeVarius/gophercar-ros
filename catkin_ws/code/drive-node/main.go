@@ -21,13 +21,14 @@ const MAX_RIGHT_ANGLE = 0
 const MAX_LEFT_PULSE = 400
 const MAX_RIGHT_PULSE = 200
 const NEUTRAL_PULSE = 300
+const STEERING_CHANNEL = 1
 
 // Throttle Paramters
 const STOP_PULSE = 0
 const MIN_THROTTLE = 0 // maybe should just use STOP_PULSE?
 const MAX_THROTTLE = 0
 const MIN_THROTTLE_PULSE = 0
-const MAX_THROTTLE_PULSE = 300
+const MAX_THROTTLE_PULSE = 400
 const THROTTLE_CHANNEL = 0
 const THROTTLE_STEP = 10
 
@@ -69,13 +70,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// https://github.com/google/periph/blob/master/conn/gpio/gpio.go read this
-	// 400 turns on gogo juice. this is dangerous when on a makeshift test stand
-	// Placeholder for testing throttle
-
-	//if err := pca.SetPwm(0, 0, 300); err != nil {
-	//        log.Fatal(err)
-	//}
 	actuatorMessages := make(chan *std_msgs.Float64MultiArray, 100)
 
 	n, err := goroslib.NewNode(goroslib.NodeConf{
@@ -134,6 +128,9 @@ func convertStampedTwistedToAngle() {
 func setThrottle(throttle msgs.Float64) error {
 	throttlePWMVal := getThrottlePWMVal(throttle)
 	fmt.Printf("Set Throttle PWM: %v\n", throttlePWMVal)
+        if err := pca.SetPwm(0, 0, gpio.Duty(throttlePWMVal)); err != nil {
+                return err
+        }
 	return nil
 }
 
@@ -150,8 +147,7 @@ func setSteering(steering msgs.Float64) error {
 func getThrottlePWMVal(val msgs.Float64) int {
 	var pwmVal int
 	if val < 0 {
-
-		pwmVal = MAX_THROTTLE_PULSE
+		pwmVal = MIN_THROTTLE_PULSE
 	}
 
 	if val > 0 {
