@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"github.com/aler9/goroslib"
 	"github.com/aler9/goroslib/msgs"
-	"github.com/aler9/goroslib/msgs/geometry_msgs"
+	"github.com/aler9/goroslib/msgs/std_msgs"
+	//	"github.com/aler9/goroslib/msgs/geometry_msgs"
 	"log"
 	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/conn/i2c/i2creg"
@@ -26,7 +27,7 @@ const STOP_PULSE = 0
 const MIN_THROTTLE = 0 // maybe should just use STOP_PULSE?
 const MAX_THROTTLE = 0
 const MIN_THROTTLE_PULSE = 0
-const MAX_THROTTLE_PULSE = 0
+const MAX_THROTTLE_PULSE = 300
 const THROTTLE_CHANNEL = 0
 const THROTTLE_STEP = 10
 
@@ -75,7 +76,7 @@ func main() {
 	//if err := pca.SetPwm(0, 0, 300); err != nil {
 	//        log.Fatal(err)
 	//}
-	actuatorMessages := make(chan *geometry_msgs.TwistStamped, 100)
+	actuatorMessages := make(chan *std_msgs.Float64MultiArray, 100)
 
 	n, err := goroslib.NewNode(goroslib.NodeConf{
 		Name:       "/gophercar-actuator",
@@ -91,7 +92,7 @@ func main() {
 	subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{
 		Node:  n,
 		Topic: "/actuator",
-		Callback: func(msg *geometry_msgs.TwistStamped) {
+		Callback: func(msg *std_msgs.Float64MultiArray) {
 			actuatorMessages <- msg
 		},
 	})
@@ -106,20 +107,16 @@ func main() {
 		for x := range actuatorMessages {
 			select {
 			case <-ticker.C:
-				fmt.Println(x)
+				fmt.Printf("Recieved: %+v\n", x)
 
-				steerErr := setSteering(x.Twist.Linear.X)
+				steerErr := setSteering(x.Data[0])
 				if err != nil {
 					panic(steerErr)
 				}
-                                throttleErr := setThrottle(x.Twist.Linear.Y)
-                                if err != nil {
-                                        panic(throttleErr)
-                                }
-
-				//fmt.Println(x.Twist.Linear.Y)
-				//fmt.Println(x.Twist.Linear.Z)
-				//fmt.Println(x.Twist.Angular)
+				throttleErr := setThrottle(x.Data[3])
+				if err != nil {
+					panic(throttleErr)
+				}
 			}
 		}
 
@@ -136,52 +133,53 @@ func convertStampedTwistedToAngle() {
 // Translate from input to throttle control pwm values
 func setThrottle(throttle msgs.Float64) error {
 	throttlePWMVal := getThrottlePWMVal(throttle)
-	fmt.Println(throttlePWMVal)
+	fmt.Printf("Set Throttle PWM: %v\n", throttlePWMVal)
 	return nil
 }
 
 // Translate from intput to direction pwm values
 func setSteering(steering msgs.Float64) error {
 	val := getSteeringPWMVal(steering)
-	if err := pca.SetPwm(1, 0,  gpio.Duty(val)); err != nil {
+	fmt.Printf("Set Steering PWM: %v\n", val)
+	if err := pca.SetPwm(1, 0, gpio.Duty(val)); err != nil {
 		return err
 	}
 	return nil
 }
 
 func getThrottlePWMVal(val msgs.Float64) int {
-        var pwmVal int
-	fmt.Println(val)
-        if val < 0 {
-                pwmVal = MAX_THROTTLE_PULSE
-        }
+	var pwmVal int
+	if val < 0 {
 
-        if val > 0 {
-                pwmVal = MIN_THROTTLE_PULSE
-        }
+		pwmVal = MAX_THROTTLE_PULSE
+	}
 
-        if val == 0 {
-                pwmVal = STOP_PULSE
-        }
+	if val > 0 {
+		pwmVal = MAX_THROTTLE_PULSE
+	}
 
-        return pwmVal
+	if val == 0 {
+		pwmVal = STOP_PULSE
+	}
+
+	return pwmVal
 
 }
 
 func getSteeringPWMVal(val msgs.Float64) int {
 	var pwmVal int
 	if val < 0 {
-	//	fmt.Println("go right")
+		//	fmt.Println("go right")
 		pwmVal = MAX_RIGHT_PULSE
 	}
 
 	if val > 0 {
-	//	fmt.Println("go left")
+		//	fmt.Println("go left")
 		pwmVal = MAX_LEFT_PULSE
 	}
 
 	if val == 0 {
-	//	fmt.Println("stay straight")
+		//	fmt.Println("stay straight")
 		pwmVal = NEUTRAL_PULSE
 	}
 
