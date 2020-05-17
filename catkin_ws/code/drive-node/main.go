@@ -67,7 +67,9 @@ func main() {
 	//}
 
 	// Channel 0 = Throttle
-	// Initialize PWM throttle at a STOPPED Value
+	// Initialize PWM throttle.
+	// When first started, the ESC needs to be calibrated with this pulse
+	// This should cause a blinking red light on the ESC to stop blinking, and a single beep to occur
 	if err := pca.SetPwm(0, 0, CALIBRATION_THROTTLE_PULSE); err != nil {
 		log.Fatal(err)
 	}
