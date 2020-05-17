@@ -114,17 +114,29 @@ func main() {
 	defer subTopic.Close()
 
 	// publisher topic to publish current ESC values to a topic
-        escTopic, err = goroslib.NewPublisher(goroslib.PublisherConf{
+        escThrottleTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
                 Node:  n,
-                Topic: "/pwm",
-                Msg:   &msgs.Int64{},
+                Topic: "/pwm-throttle",
+                Msg:   &std_msgs.Int64{},
                 Latch: false,
         })
         if err != nil {
                 panic(err)
         }
-        fmt.Println("Connected to ESC Publisher Topic")
-        defer escTopic()
+        fmt.Println("Connected to PWM-Throttle Publisher Topic")
+        defer escThrottleTopic.Close()
+
+        escSteeringTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
+                Node:  n,
+                Topic: "/pwm-steering",
+                Msg:   &std_msgs.Int64{},
+                Latch: false,
+        })
+        if err != nil {
+                panic(err)
+        }
+        fmt.Println("Connected to PWM-Steering Publisher Topic")
+        defer escSteeringTopic.Close()
 
 
 	// Start doing stuff
