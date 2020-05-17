@@ -26,8 +26,9 @@ const STEERING_CHANNEL = 1
 const STOP_PULSE = 0
 const MIN_THROTTLE = 0 // maybe should just use STOP_PULSE?
 const MAX_THROTTLE = 0
+const CALIBRATION_THROTTLE_PULSE = 330
 const MIN_THROTTLE_PULSE = 0
-const MAX_THROTTLE_PULSE = 500
+const MAX_THROTTLE_PULSE = 400
 const THROTTLE_CHANNEL = 0
 const THROTTLE_STEP = 10
 
@@ -67,13 +68,13 @@ func main() {
 
 	// Channel 0 = Throttle
 	// Initialize PWM throttle at a STOPPED Value
-	if err := pca.SetPwm(0, 0, 370); err != nil {
+	if err := pca.SetPwm(0, 0, CALIBRATION_THROTTLE_PULSE); err != nil {
 		log.Fatal(err)
 	}
 
 	// Channel 1 = Steering
 	// Initialize PWM Steering at a Neutral Value
-	if err := pca.SetPwm(1, 0, NEUTRAL_PULSE); err != nil {
+	if err := pca.SetPwm(STEERING_CHANNEL, 0, NEUTRAL_PULSE); err != nil {
 		log.Fatal(err)
 	}
 
