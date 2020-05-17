@@ -32,6 +32,11 @@ const MAX_THROTTLE_PULSE = 400
 const THROTTLE_CHANNEL = 0
 const THROTTLE_STEP = 10
 
+// ROS Paramaters
+const ROS_MASTER = "donkeycar"
+const ROS_NODE_NAME = ""
+const ACTUATOR_TOPIC = "/actuator"
+
 var pca *pca9685.Dev
 var sc *statsd.Client
 
@@ -70,12 +75,14 @@ func main() {
 	// Initialize PWM throttle.
 	// When first started, the ESC needs to be calibrated with this pulse
 	// This should cause a blinking red light on the ESC to stop blinking, and a single beep to occur
+	fmt.Println("Initializing ESC")
 	if err := pca.SetPwm(0, 0, CALIBRATION_THROTTLE_PULSE); err != nil {
 		log.Fatal(err)
 	}
 
 	// Channel 1 = Steering
 	// Initialize PWM Steering at a Neutral Value
+	fmt.Println("Initializing Steering")
 	if err := pca.SetPwm(STEERING_CHANNEL, 0, NEUTRAL_PULSE); err != nil {
 		log.Fatal(err)
 	}
@@ -84,18 +91,18 @@ func main() {
 
 	n, err := goroslib.NewNode(goroslib.NodeConf{
 		Name:       "/gophercar-actuator",
-		MasterHost: "donkeycar",
+		MasterHost: ROS_MASTER,
 	})
 	if err != nil {
 		panic(err)
 	}
-	fmt.Print("Connected to Master")
+	fmt.Println("Connected to Master: " + ROS_MASTER)
 	defer n.Close()
 
-	// create a subscriber
+	// Subscribe to actuator topic to process joy/keypresses
 	subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{
 		Node:  n,
-		Topic: "/actuator",
+		Topic: ACTUATOR_TOPIC,
 		Callback: func(msg *std_msgs.Float64MultiArray) {
 			actuatorMessages <- msg
 		},
@@ -103,9 +110,24 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Connected to subscriber topic")
+	fmt.Println("Subscribed to: " + ACTUATOR_TOPIC)
 	defer subTopic.Close()
 
+	// publisher topic to publish current ESC values to a topic
+        escTopic, err = goroslib.NewPublisher(goroslib.PublisherConf{
+                Node:  n,
+                Topic: "/pwm",
+                Msg:   &msgs.Int64{},
+                Latch: false,
+        })
+        if err != nil {
+                panic(err)
+        }
+        fmt.Println("Connected to ESC Publisher Topic")
+        defer escTopic()
+
+
+	// Start doing stuff
 	ticker := time.NewTicker(100)
 	go func() {
 		for x := range actuatorMessages {
