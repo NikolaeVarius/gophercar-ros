@@ -5,7 +5,8 @@ import (
 	"github.com/aler9/goroslib"
 	"github.com/aler9/goroslib/msgs"
 	"github.com/aler9/goroslib/msgs/std_msgs"
-	"gopkg.in/alexcesaro/statsd.v2"
+	//"gopkg.in/alexcesaro/statsd.v2"
+	"github.com/cactus/go-statsd-client/statsd"
 	"log"
 	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/conn/i2c/i2creg"
@@ -38,19 +39,26 @@ const ROS_NODE_NAME = ""
 const ACTUATOR_TOPIC = "/actuator"
 
 var pca *pca9685.Dev
-var sc *statsd.Client
+var sc statsd.Statter
 
 // Other
 const STATSD_HOST = "161.35.109.219"
 
 func init() {
-	// StatsD
+        // statsd
 	var err error
-	sc, err = statsd.New()
-	if err != nil {
-		log.Print(err)
-	}
-	defer sc.Close()
+        config := &statsd.ClientConfig{
+                Address:       "161.35.109.219:8125",
+                Prefix:        "drive-node",
+                UseBuffered:   true,
+                FlushInterval: 300 * time.Millisecond,
+        }
+        sc, err = statsd.NewClientWithConfig(config)
+        if err != nil {
+                log.Fatal(err)
+        }
+        defer sc.Close()
+
 }
 
 func main() {
@@ -177,7 +185,6 @@ func setThrottle(throttle msgs.Float64) (int, error) {
 	if err := pca.SetPwm(0, 0, gpio.Duty(throttlePWMVal)); err != nil {
 		return 0, err
 	}
-	sc.Gauge("throttle_pwm", throttlePWMVal)
 	return throttlePWMVal, nil
 }
 
@@ -188,7 +195,6 @@ func setSteering(steering msgs.Float64) (int, error) {
 	if err := pca.SetPwm(1, 0, gpio.Duty(val)); err != nil {
 		return 0, err
 	}
-	sc.Gauge("steering_pwm", val)
 	return val, nil
 }
 
