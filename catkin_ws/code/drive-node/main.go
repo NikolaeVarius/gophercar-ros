@@ -5,14 +5,13 @@ import (
 	"github.com/aler9/goroslib"
 	"github.com/aler9/goroslib/msgs"
 	"github.com/aler9/goroslib/msgs/std_msgs"
-	//	"github.com/aler9/goroslib/msgs/geometry_msgs"
 	"log"
 	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/conn/i2c/i2creg"
 	"periph.io/x/periph/experimental/devices/pca9685"
 	"periph.io/x/periph/host"
-	// "github.com/aler9/goroslib/msgs/sensor_msgs"
 	"time"
+"gopkg.in/alexcesaro/statsd.v2"
 )
 
 // Steering Angle Parameters
@@ -32,10 +31,18 @@ const MAX_THROTTLE_PULSE = 500
 const THROTTLE_CHANNEL = 0
 const THROTTLE_STEP = 10
 
-//type pcaHandler struct {
-//    pca *pca9685.Dev
-//}
 var pca *pca9685.Dev
+var sc *statsd.Client
+
+func init() {
+  // StatsD
+  var err error
+  sc, err = statsd.New()
+  if err != nil {
+    log.Print(err)
+  }
+  defer sc.Close()
+}
 
 func main() {
 	_, err := host.Init()
@@ -131,6 +138,7 @@ func setThrottle(throttle msgs.Float64) error {
         if err := pca.SetPwm(0, 0, gpio.Duty(throttlePWMVal)); err != nil {
                 return err
         }
+	sc.Gauge("throttle_pwm", throttlePWMVal)
 	return nil
 }
 
@@ -141,6 +149,7 @@ func setSteering(steering msgs.Float64) error {
 	if err := pca.SetPwm(1, 0, gpio.Duty(val)); err != nil {
 		return err
 	}
+	sc.Gauge("steering_pwm", val)
 	return nil
 }
 
