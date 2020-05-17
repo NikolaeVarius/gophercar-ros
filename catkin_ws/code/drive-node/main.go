@@ -5,13 +5,13 @@ import (
 	"github.com/aler9/goroslib"
 	"github.com/aler9/goroslib/msgs"
 	"github.com/aler9/goroslib/msgs/std_msgs"
+	"gopkg.in/alexcesaro/statsd.v2"
 	"log"
 	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/conn/i2c/i2creg"
 	"periph.io/x/periph/experimental/devices/pca9685"
 	"periph.io/x/periph/host"
 	"time"
-"gopkg.in/alexcesaro/statsd.v2"
 )
 
 // Steering Angle Parameters
@@ -40,14 +40,17 @@ const ACTUATOR_TOPIC = "/actuator"
 var pca *pca9685.Dev
 var sc *statsd.Client
 
+// Other
+const STATSD_HOST = "161.35.109.219"
+
 func init() {
-  // StatsD
-  var err error
-  sc, err = statsd.New()
-  if err != nil {
-    log.Print(err)
-  }
-  defer sc.Close()
+	// StatsD
+	var err error
+	sc, err = statsd.New()
+	if err != nil {
+		log.Print(err)
+	}
+	defer sc.Close()
 }
 
 func main() {
@@ -114,30 +117,29 @@ func main() {
 	defer subTopic.Close()
 
 	// publisher topic to publish current ESC values to a topic
-        escThrottleTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
-                Node:  n,
-                Topic: "/pwm-throttle",
-                Msg:   &std_msgs.Int64{},
-                Latch: false,
-        })
-        if err != nil {
-                panic(err)
-        }
-        fmt.Println("Connected to PWM-Throttle Publisher Topic")
-        defer escThrottleTopic.Close()
+	escThrottleTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
+		Node:  n,
+		Topic: "/pwm-throttle",
+		Msg:   &std_msgs.Int64{},
+		Latch: false,
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Connected to PWM-Throttle Publisher Topic")
+	defer escThrottleTopic.Close()
 
-        escSteeringTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
-                Node:  n,
-                Topic: "/pwm-steering",
-                Msg:   &std_msgs.Int64{},
-                Latch: false,
-        })
-        if err != nil {
-                panic(err)
-        }
-        fmt.Println("Connected to PWM-Steering Publisher Topic")
-        defer escSteeringTopic.Close()
-
+	escSteeringTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
+		Node:  n,
+		Topic: "/pwm-steering",
+		Msg:   &std_msgs.Int64{},
+		Latch: false,
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Connected to PWM-Steering Publisher Topic")
+	defer escSteeringTopic.Close()
 
 	// Start doing stuff
 	ticker := time.NewTicker(100)
@@ -172,9 +174,9 @@ func convertStampedTwistedToAngle() {
 func setThrottle(throttle msgs.Float64) error {
 	throttlePWMVal := getThrottlePWMVal(throttle)
 	fmt.Printf("Set Throttle PWM: %v\n", throttlePWMVal)
-        if err := pca.SetPwm(0, 0, gpio.Duty(throttlePWMVal)); err != nil {
-                return err
-        }
+	if err := pca.SetPwm(0, 0, gpio.Duty(throttlePWMVal)); err != nil {
+		return err
+	}
 	sc.Gauge("throttle_pwm", throttlePWMVal)
 	return nil
 }
