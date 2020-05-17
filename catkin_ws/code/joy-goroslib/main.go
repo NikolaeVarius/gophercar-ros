@@ -15,17 +15,21 @@ var pubTopic *goroslib.Publisher
 
 func covertJoyToStdMessage(msg *sensor_msgs.Joy) std_msgs.Float64MultiArray {
 	var newMsg std_msgs.Float64MultiArray
-	newMsg.Data
+	// 4 probably isn't the right size
+	data := make([]msgs.Float64, 4)
 	
 	fmt.Println("Incoming: %#v\n", msg)
 	leftJoyX := msgs.Float64(float64(msg.Axes[0]))
 	leftJoyY := msgs.Float64(float64(msg.Axes[1]))
 	rightJoyX := msgs.Float64(float64(msg.Axes[2]))
-	rightJoyY := msgs.Float64(float64(msg.Axes[3]))
-	newMsg.Data[0] = leftJoyX
-        newMsg.Data[1] = leftJoyY
-	newMsg.Data[2] = rightJoyX
-	newMsg.Data[3] = rightJoyY
+	rightJoyY := msgs.Float64(float64(msg.Axes[5]))
+
+	data[0] = leftJoyX
+        data[1] = leftJoyY
+	data[2] = rightJoyX
+	data[3] = rightJoyY
+
+	newMsg.Data = data
 
 	return newMsg
 }
