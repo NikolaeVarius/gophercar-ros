@@ -149,11 +149,11 @@ func main() {
 			case <-ticker.C:
 				fmt.Printf("Recieved: %+v\n", x)
 
-				steerErr := setSteering(x.Data[0])
+				_, steerErr := setSteering(x.Data[0])
 				if err != nil {
 					panic(steerErr)
 				}
-				throttleErr := setThrottle(x.Data[3])
+				_, throttleErr := setThrottle(x.Data[3])
 				if err != nil {
 					panic(throttleErr)
 				}
@@ -171,25 +171,25 @@ func convertStampedTwistedToAngle() {
 }
 
 // Translate from input to throttle control pwm values
-func setThrottle(throttle msgs.Float64) error {
+func setThrottle(throttle msgs.Float64) (int, error) {
 	throttlePWMVal := getThrottlePWMVal(throttle)
 	fmt.Printf("Set Throttle PWM: %v\n", throttlePWMVal)
 	if err := pca.SetPwm(0, 0, gpio.Duty(throttlePWMVal)); err != nil {
-		return err
+		return 0, err
 	}
 	sc.Gauge("throttle_pwm", throttlePWMVal)
-	return nil
+	return throttlePWMVal, nil
 }
 
 // Translate from intput to direction pwm values
-func setSteering(steering msgs.Float64) error {
+func setSteering(steering msgs.Float64) (int, error) {
 	val := getSteeringPWMVal(steering)
 	fmt.Printf("Set Steering PWM: %v\n", val)
 	if err := pca.SetPwm(1, 0, gpio.Duty(val)); err != nil {
-		return err
+		return 0, err
 	}
 	sc.Gauge("steering_pwm", val)
-	return nil
+	return val, nil
 }
 
 func getThrottlePWMVal(val msgs.Float64) int {
