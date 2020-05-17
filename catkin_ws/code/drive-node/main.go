@@ -157,12 +157,15 @@ func main() {
 			case <-ticker.C:
 				fmt.Printf("Recieved: %+v\n", x)
 
-				_, steerErr := setSteering(x.Data[0])
-				if err != nil {
-					panic(steerErr)
-				}
-				_, throttleErr := setThrottle(x.Data[3])
-				if err != nil {
+				steeringPwm, steerErr := setSteering(x.Data[0])
+				_ = sc.Gauge("steering_pwm", int64(steeringPwm), 1.0)
+                                if steerErr != nil {
+                                        panic(steerErr)
+                                }
+
+				throttlePwm, throttleErr := setThrottle(x.Data[3])
+				_ = sc.Gauge("throttle_pwm", int64(throttlePwm), 1.0)
+				if throttleErr != nil {
 					panic(throttleErr)
 				}
 			}
