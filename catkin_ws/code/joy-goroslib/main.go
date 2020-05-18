@@ -52,14 +52,12 @@ func init() {
         if err != nil {
                 log.Fatal(err)
         }
-        defer sc.Close()
-
 }
 
 
 func main() {
 	joyMessages := make(chan *sensor_msgs.Joy, 100)
-
+	defer sc.Close()
 	n, err := goroslib.NewNode(goroslib.NodeConf{
 		Name:       "/goroslib",
 		MasterHost: "donkeycar",

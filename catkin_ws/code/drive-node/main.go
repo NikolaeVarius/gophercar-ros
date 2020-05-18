@@ -57,7 +57,6 @@ func init() {
         if err != nil {
                 log.Fatal(err)
         }
-        defer sc.Close()
 
 }
 
@@ -66,6 +65,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// defer closing of statsd client`
+        defer sc.Close()
 	// According to pinout of Jetson Nano, this is the i2c bus
 	bus, err := i2creg.Open("1")
 	if err != nil {
@@ -156,6 +157,10 @@ func main() {
 			select {
 			case <-ticker.C:
 				fmt.Printf("Recieved: %+v\n", x)
+	       		        scErr := sc.Inc("stat1", 42, 1.0)
+		                if scErr!= nil {
+                                        panic(scErr)
+                                }
 
 				steeringPwm, steerErr := setSteering(x.Data[0])
 				_ = sc.Gauge("steering_pwm", int64(steeringPwm), 1.0)
