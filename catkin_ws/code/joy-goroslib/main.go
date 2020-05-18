@@ -20,13 +20,23 @@ func covertJoyToStdMessage(msg *sensor_msgs.Joy) std_msgs.Float64MultiArray {
 	var newMsg std_msgs.Float64MultiArray
 	// 4 probably isn't the right size
 	data := make([]msgs.Float64, 4)
-	
+	// Joy sticks
 	fmt.Println("Incoming: %#v\n", msg)
 	leftJoyX := msgs.Float64(float64(msg.Axes[0]))
 	leftJoyY := msgs.Float64(float64(msg.Axes[1]))
 	rightJoyX := msgs.Float64(float64(msg.Axes[2]))
+	
 	rightJoyY := msgs.Float64(float64(msg.Axes[5]))
 
+	// Face buttons
+        square_btn = ""
+	cross_btn = ""
+	circle_btn = ""
+	tirangle_btn = ""
+
+
+
+	//==================================
 	data[0] = leftJoyX
         data[1] = leftJoyY
 	data[2] = rightJoyX
