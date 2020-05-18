@@ -244,6 +244,17 @@ func getSteeringPWMVal(val msgs.Float64) int {
 	return pwmVal
 }
 
+// converts -1/1 values to equivalent pwm values depending on scale
+func normalize(input, min, max  msgs.Float64)  msgs.Float64 {
+	i := input*(math.Max(min, max)-math.Min(min, max)) + math.Min(min, max)
+	if i < math.Min(min, max) {
+		return math.Min(min, max)
+	} else if i > math.Max(min, max) {
+		return math.Max(min, max)
+	} else {
+		return i
+	}
+}
 // copy pasta to try it out some time in the future
 func Every(t time.Duration, f func()) *time.Ticker {
 	ticker := time.NewTicker(t)
