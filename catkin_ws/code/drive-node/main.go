@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"github.com/aler9/goroslib"
 	"github.com/aler9/goroslib/msgs"
 	"github.com/aler9/goroslib/msgs/std_msgs"
-	//"gopkg.in/alexcesaro/statsd.v2"
 	"github.com/cactus/go-statsd-client/statsd"
 	"log"
 	"periph.io/x/periph/conn/gpio"
@@ -120,6 +120,7 @@ func main() {
 		},
 	})
 	if err != nil {
+		fmt,Println("Most likely the topic this subscriber wants to attach to does not exist")
 		panic(err)
 	}
 	fmt.Println("Subscribed to: " + ACTUATOR_TOPIC)
@@ -245,7 +246,7 @@ func getSteeringPWMVal(val msgs.Float64) int {
 }
 
 // converts -1/1 values to equivalent pwm values depending on scale
-func normalize(input, min, max  msgs.Float64)  msgs.Float64 {
+func normalize(input, min, max  float64)  float64 {
 	i := input*(math.Max(min, max)-math.Min(min, max)) + math.Min(min, max)
 	if i < math.Min(min, max) {
 		return math.Min(min, max)
