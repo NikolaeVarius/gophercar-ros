@@ -43,7 +43,6 @@ var sc statsd.Statter
 
 // Other
 const STATSD_HOST = "161.35.109.219"
-const STATSD_RATE = "0.1"
 
 func init() {
         // statsd
@@ -158,19 +157,19 @@ func main() {
 			select {
 			case <-ticker.C:
 				fmt.Printf("Recieved: %+v\n", x)
-	       		        scErr := sc.Inc("drive_node_recieved", 1, STATSD_RATE)
+	       		        scErr := sc.Inc("stat1", 42, 1.0)
 		                if scErr!= nil {
                                         panic(scErr)
                                 }
 
 				steeringPwm, steerErr := setSteering(x.Data[0])
-				_ = sc.Gauge("steering_pwm", int64(steeringPwm), STATSD_RATE)
+				_ = sc.Gauge("steering_pwm", int64(steeringPwm), 1.0)
                                 if steerErr != nil {
                                         panic(steerErr)
                                 }
 
 				throttlePwm, throttleErr := setThrottle(x.Data[3])
-				_ = sc.Gauge("throttle_pwm", int64(throttlePwm), STATSD_RATE)
+				_ = sc.Gauge("throttle_pwm", int64(throttlePwm), 1.0)
 				if throttleErr != nil {
 					panic(throttleErr)
 				}
