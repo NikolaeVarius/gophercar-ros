@@ -29,10 +29,10 @@ func covertJoyToStdMessage(msg *sensor_msgs.Joy) std_msgs.Float64MultiArray {
 	rightJoyY := msgs.Float64(float64(msg.Axes[5]))
 
 	// Face buttons
-        square_btn = ""
-	cross_btn = ""
-	circle_btn = ""
-	tirangle_btn = ""
+//        square_btn := ""
+//	cross_btn := ""
+//	circle_btn := ""
+//	tirangle_btn := ""
 
 
 
