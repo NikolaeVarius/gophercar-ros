@@ -120,7 +120,7 @@ func main() {
 		},
 	})
 	if err != nil {
-		fmt,Println("Most likely the topic this subscriber wants to attach to does not exist")
+		fmt.Println("Most likely the topic this subscriber wants to attach to does not exist")
 		panic(err)
 	}
 	fmt.Println("Subscribed to: " + ACTUATOR_TOPIC)
@@ -207,14 +207,20 @@ func setSteering(steering msgs.Float64) (int, error) {
 	return val, nil
 }
 
+//  Turns a -1/1 Joy value into a scaled PWM value
 func getThrottlePWMVal(val msgs.Float64) int {
 	var pwmVal int
+	//var scaledPwmVal int
+	
+	scaledPwmVal := normalize(float64(val), float64(MIN_THROTTLE_PULSE), float64(MAX_THROTTLE_PULSE))
+        fmt.Printf("%s converted to %s", val, scaledPwmVal)
+	// TODO; Fix this up so that going backward is a thing. Not 100% what that would look like
 	if val < 0 {
 		pwmVal = MIN_THROTTLE_PULSE
 	}
 
 	if val > 0 {
-		pwmVal = MAX_THROTTLE_PULSE
+		pwmVal = int(scaledPwmVal)
 	}
 
 	if val == 0 {
@@ -246,7 +252,7 @@ func getSteeringPWMVal(val msgs.Float64) int {
 }
 
 // converts -1/1 values to equivalent pwm values depending on scale
-func normalize(input, min, max  float64)  float64 {
+func normalize(input, min, max float64)  float64 {
 	i := input*(math.Max(min, max)-math.Min(min, max)) + math.Min(min, max)
 	if i < math.Min(min, max) {
 		return math.Min(min, max)
