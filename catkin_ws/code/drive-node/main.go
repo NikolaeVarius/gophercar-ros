@@ -213,7 +213,7 @@ func getThrottlePWMVal(val msgs.Float64) int {
 	//var scaledPwmVal int
 	
 	scaledPwmVal := normalize(float64(val), float64(MIN_THROTTLE_PULSE), float64(MAX_THROTTLE_PULSE))
-        fmt.Printf("%s converted to %s", val, scaledPwmVal)
+        fmt.Printf("%f converted to %f\n", val, scaledPwmVal)
 	// TODO; Fix this up so that going backward is a thing. Not 100% what that would look like
 	if val < 0 {
 		pwmVal = MIN_THROTTLE_PULSE
@@ -233,14 +233,16 @@ func getThrottlePWMVal(val msgs.Float64) int {
 
 func getSteeringPWMVal(val msgs.Float64) int {
 	var pwmVal int
+        scaledPwmVal := normalize(float64(val), float64(MAX_RIGHT_PULSE), float64(MAX_LEFT_PULSE))
+	fmt.Printf("%f convfrted to %f\n", val, scaledPwmVal)
 	if val < 0 {
 		//	fmt.Println("go right")
-		pwmVal = MAX_RIGHT_PULSE
+		pwmVal = int(scaledPwmVal)
 	}
 
 	if val > 0 {
 		//	fmt.Println("go left")
-		pwmVal = MAX_LEFT_PULSE
+		pwmVal = int(scaledPwmVal)
 	}
 
 	if val == 0 {
