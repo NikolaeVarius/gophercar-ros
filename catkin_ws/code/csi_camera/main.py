@@ -14,36 +14,23 @@ from scipy.ndimage import filters
 
 from sensor_msgs.msg import CompressedImage
 VERBOSE="true"
+# Toggle if a window showing camera output should pop up
+SHOW__CAMERA="true"
+# Toggle convering to greyscale
+GRAYSCALE="false"
 
 
-class image_converter:
+class image_publisher:
     def __init__(self):
-        self.image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage)
-        # self.bridge = CvBridge()
-
-    def callback(self, ros_data):
-        if VERBOSE :
-            print('received image of type: "%s"') % ros_data.format
+        self.bridge = CvBridge()
 
         #### direct conversion to CV2 ####
         np_arr = np.fromstring(ros_data.data, np.uint8)
         image_np = cv2.imdecode(np_arr, cv2.CV_LOAD_IMAGE_COLOR)
         #image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR) # OpenCV >= 3.0:
         
-        #### Feature detectors using CV2 #### 
-        # "","Grid","Pyramid" + 
-        # "FAST","GFTT","HARRIS","MSER","ORB","SIFT","STAR","SURF"
-        method = "GridFAST"
-        feat_det = cv2.FeatureDetector_create(method)
-        time1 = time.time()
 
-        # convert np image to grayscale
-        featPoints = feat_det.detect(
-            cv2.cvtColor(image_np, cv2.COLOR_BGR2GRAY))
         time2 = time.time()
-        #if VERBOSE :
-          #  print '%s detector found: %s points in: %s sec.'%(method,
-           #     len(featPoints),time2-time1)
 
         for featpoint in featPoints:
             x,y = featpoint.pt
@@ -88,34 +75,25 @@ def gstreamer_pipeline(
     )
 
 def main(args):
-    ic = image_feature()
     rospy.init_node('image_feature', anonymous="false")
-    try:
-        rospy.spin()
-    except KeyboardInterrupt:
-        print( "Shutting down ROS Image feature detector module")
-    cv2.destroyAllWindows()
-
-
-def show_camera():
-    print(gstreamer_pipeline(flip_method=0))
+    image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage)
     cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
+
     if cap.isOpened():
         window_handle = cv2.namedWindow("CSI Camera", cv2.WINDOW_AUTOSIZE)
         # Window
         while cv2.getWindowProperty("CSI Camera", 0) >= 0:
             ret_val, img = cap.read()
             cv2.imshow("CSI Camera", img)
-            # This also acts as
-            keyCode = cv2.waitKey(30) & 0xFF
-            # Stop the program on the ESC key
-            if keyCode == 27:
-                break
         cap.release()
-        cv2.destroyAllWindows()
     else:
         print("Unable to open camera")
 
+    try:
+        rospy.spin()
+    except KeyboardInterrupt:
+        print( "Shutting down ROS Camera Publisher")
+    cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
