@@ -8,6 +8,8 @@ import cv2
 import sys, time
 import roslib
 import rospy
+import os
+
 from cv_bridge import CvBridge
 import numpy as np
 from scipy.ndimage import filters
@@ -18,34 +20,6 @@ VERBOSE="true"
 SHOW__CAMERA="true"
 # Toggle convering to greyscale
 GRAYSCALE="false"
-
-
-class image_publisher:
-    def __init__(self):
-        self.bridge = CvBridge()
-
-        #### direct conversion to CV2 ####
-        np_arr = np.fromstring(ros_data.data, np.uint8)
-        image_np = cv2.imdecode(np_arr, cv2.CV_LOAD_IMAGE_COLOR)
-        #image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR) # OpenCV >= 3.0:
-        
-
-        time2 = time.time()
-
-        for featpoint in featPoints:
-            x,y = featpoint.pt
-            cv2.circle(image_np,(int(x),int(y)), 3, (0,0,255), -1)
-        
-        cv2.imshow('cv_img', image_np)
-        cv2.waitKey(2)
-
-        #### Create CompressedIamge ####
-        msg = CompressedImage()
-        msg.header.stamp = rospy.Time.now()
-        msg.format = "jpeg"
-        msg.data = np.array(cv2.imencode('.jpg', image_np)[1]).tostring()
-        self.image_pub.publish(msg)
-        #self.subscriber.unregister()
 
 def gstreamer_pipeline(
     capture_width=1280,
@@ -75,9 +49,13 @@ def gstreamer_pipeline(
     )
 
 def main(args):
+    print("ROS_MASTER_URI: " + os.environ['ROS_MASTER_URI'])
     rospy.init_node('image_capture', anonymous="false")
     image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage)
+    # Annoyingly bridge does not support compressed image
+    bridge = CvBridge()
     print(gstreamer_pipeline(flip_method=2))
+    # rate = rospy.Rate(0.5)
 
     cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 
@@ -86,9 +64,22 @@ def main(args):
         while cv2.getWindowProperty("CSI Camera", 0) >= 0:
             ret_val, img = cap.read()
             cv2.imshow("CSI Camera", img)
-            keyCode = cv2.waitKey(30) & 0xFF
-            if keyCode == 27:
-                break
+            while ret_val:
+                rval, frame = cap.read()
+                # cv2.imshow("Stream: " + frame)
+                
+                if frame is not None:
+                    frame = np.uint8(frame)
+                # image_message = bridge.cv2_to_imgmsg(frame, encoding="passthrough")
+                msg = CompressedImage()
+                msg.header.stamp = rospy.Time.now()
+                msg.format = "jpeg"
+                msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
+                image_pub.publish(msg)
+
+                keyCode = cv2.waitKey(1000) & 0xFF
+                if keyCode == 27:
+                    break
         cap.release()
         cv2.destroyAllWindows()
     else:
