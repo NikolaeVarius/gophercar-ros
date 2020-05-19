@@ -58,6 +58,7 @@ def main(args):
     # rate = rospy.Rate(0.5)
 
     cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
+    frames = 0
 
     if cap.isOpened():
         window_handle = cv2.namedWindow("CSI Camera", cv2.WINDOW_AUTOSIZE)
@@ -65,6 +66,7 @@ def main(args):
             ret_val, img = cap.read()
             cv2.imshow("CSI Camera", img)
             while ret_val:
+                # this is slow
                 rval, frame = cap.read()
                 # cv2.imshow("Stream: " + frame)
                 
@@ -75,6 +77,8 @@ def main(args):
                 msg.header.stamp = rospy.Time.now()
                 msg.format = "jpeg"
                 msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
+                frames = frames + 1
+                print(frames)
                 image_pub.publish(msg)
 
                 keyCode = cv2.waitKey(1000) & 0xFF
