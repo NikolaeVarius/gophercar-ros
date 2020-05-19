@@ -67,16 +67,16 @@ def main(args):
             ret_val, img = cap.read()
             while ret_val:
                 # this is slow
-                rval, frame = cap.read()
-                # cv2.imshow("CSI Camera", img)
+                # rval, frame = cap.read()
+                cv2.imshow("CSI Camera", img)
                 
-                if frame is not None:
-                    frame = np.uint8(frame)
+                if img is not None:
+                    img = np.uint8(img)
                 # image_message = bridge.cv2_to_imgmsg(frame, encoding="passthrough")
                 msg = CompressedImage()
                 msg.header.stamp = rospy.Time.now()
                 msg.format = "jpeg"
-                msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
+                msg.data = np.array(cv2.imencode('.jpg', img)[1]).tostring()
                 frames = frames + 1
                 print(frames)
                 image_pub.publish(msg)
