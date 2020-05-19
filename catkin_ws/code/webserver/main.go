@@ -5,50 +5,41 @@
 // mjpeg-streamer [camera ID] [host:port]
 //
 //		go get -u github.com/hybridgroup/mjpeg
-// 		go run ./cmd/mjpeg-streamer/main.go 1 0.0.0.0:8080
-//
-// +build example
-
+// 		go run ./cmd/mjpeg-streamer/main.go 0.0.0.0:8080
 package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
 	"os"
 	"time"
 
+	"net/http"
 	_ "net/http/pprof"
 
 	"github.com/aler9/goroslib"
-	"github.com/aler9/goroslib/msgs/std_msgs"
+	"github.com/aler9/goroslib/msgs/sensor_msgs"
 	"github.com/hybridgroup/mjpeg"
-	"gocv.io/x/gocv"
 )
 
 var (
 	deviceID int
 	err      error
-	webcam   *gocv.VideoCapture
 	stream   *mjpeg.Stream
 )
 
 const ROS_MASTER = "donkeycar"
 
 func main() {
-	if len(os.Args) < 3 {
+	if len(os.Args) < 2 {
 		fmt.Println("How to run:\n\tmjpeg-streamer [camera ID] [host:port]")
 		return
 	}
 
 	// parse args
-	deviceID := os.Args[1]
-	host := os.Args[2]
+	host := os.Args[1]
+	fmt.Println(host)
 
-	// create the mjpeg stream
-	stream = mjpeg.NewStream()
-
-	compressedImageMessages := make(chan *std_msgs.CompressedImage, 100)
+	compressedImageMessages := make(chan *sensor_msgs.CompressedImage, 100)
 
 	n, err := goroslib.NewNode(goroslib.NodeConf{
 		Name:       "/webserver",
@@ -65,7 +56,7 @@ func main() {
 	subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{
 		Node:  n,
 		Topic: "/output/image_raw/compressed",
-		Callback: func(msg *std_msgs.CompressedImage) {
+		Callback: func(msg *sensor_msgs.CompressedImage) {
 			compressedImageMessages <- msg
 		},
 	})
@@ -76,43 +67,29 @@ func main() {
 
 	fmt.Println("Subscribed to: " + "/output/image_raw/compressed")
 	defer subTopic.Close()
+	// create the mjpeg stream
+	stream := mjpeg.NewStream()
 
 	// start capturing
-	go mjpegCapture()
+	go mjpegCapture(compressedImageMessages)
+	// start http server
+	http.Handle("/", stream)
+	http.ListenAndServe(host, nil)
+	// fmt.Println("Capturing. Point your browser to " + host)
+	// infty := make(chan int)
+	// <-infty
+}
 
-	fmt.Println("Capturing. Point your browser to " + host)
-
-	// Start doing stuff
+func mjpegCapture(ch chan *sensor_msgs.CompressedImage) {
 	ticker := time.NewTicker(100)
 	go func() {
-		for x := range compressedImageMessages {
+		for x := range ch {
 			select {
 			case <-ticker.C:
+				fmt.Println(x.Header)
 				return
 			}
 		}
 
 	}()
-
-	// start http server
-	http.Handle("/", stream)
-	log.Fatal(http.ListenAndServe(host, nil))
-}
-
-func mjpegCapture() {
-	img := gocv.NewMat()
-	defer img.Close()
-
-	for {
-		if ok := webcam.Read(&img); !ok {
-			fmt.Printf("Device closed: %v\n", deviceID)
-			return
-		}
-		if img.Empty() {
-			continue
-		}
-
-		buf, _ := gocv.IMEncode(".jpg", img)
-		stream.UpdateJPEG(buf)
-	}
 }
