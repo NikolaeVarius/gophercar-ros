@@ -65,11 +65,9 @@ def main(args):
 
         while cv2.getWindowProperty("CSI Camera", 0) >= 0:
             ret_val, img = cap.read()
+               
             while ret_val:
-                # this is slow
-                # rval, frame = cap.read()
-                cv2.imshow("CSI Camera", img)
-                
+                cv2.imshow("CSI Camera", img) 
                 if img is not None:
                     img = np.uint8(img)
                 # image_message = bridge.cv2_to_imgmsg(frame, encoding="passthrough")
@@ -81,7 +79,7 @@ def main(args):
                 print(frames)
                 image_pub.publish(msg)
 
-                keyCode = cv2.waitKey(1000) & 0xFF
+                keyCode = cv2.waitKey(30) & 0xFF
                 if keyCode == 27:
                     break
         cap.release()
