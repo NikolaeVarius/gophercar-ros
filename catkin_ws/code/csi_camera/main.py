@@ -3,24 +3,23 @@
 # Based off 
 ## https://github.com/JetsonHacksNano/CSI-Camera/blob/master/simple_camera.py
 ## http://wiki.ros.org/rospy_tutorials/Tutorials/WritingImagePublisherSubscriber
+## http://wiki.ros.org/cv_bridge/Tutorials/ConvertingBetweenROSImagesAndOpenCVImagesPython
 import cv2
 import sys, time
 import roslib
 import rospy
-
+from from cv_bridge import CvBridge
 import numpy as np
 from scipy.ndimage import filters
 
 from sensor_msgs.msg import CompressedImage
+VERBOSE="true"
+
 
 class image_feature:
     def __init__(self):
         self.image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage)
         # self.bridge = CvBridge()
-        # subscribed Topic
-        self.subscriber = rospy.Subscriber("/camera/image/compressed", CompressedImage, self.callback,  queue_size = 1)
-        if VERBOSE :
-            print("subscribed to /camera/image/compressed")
 
     def callback(self, ros_data):
         if VERBOSE :
@@ -90,7 +89,7 @@ def gstreamer_pipeline(
 
 def main(args):
     ic = image_feature()
-    rospy.init_node('image_feature', anonymous=false)
+    rospy.init_node('image_feature', anonymous="false")
     try:
         rospy.spin()
     except KeyboardInterrupt:
@@ -120,4 +119,4 @@ def show_camera():
 
 
 if __name__ == "__main__":
-    show_camera()
+  main(sys.argv)
