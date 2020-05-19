@@ -22,20 +22,20 @@ SHOW__CAMERA="true"
 GRAYSCALE="false"
 
 def gstreamer_pipeline(
-    capture_width=1280,
-    capture_height=720,
-    display_width=1280,
-    display_height=720,
+    capture_width=640,
+    capture_height=480,
+    display_width=640,
+    display_height=480,
     framerate=30,
     flip_method=2,
 ):
     return (
         "nvarguscamerasrc ! "
         "video/x-raw(memory:NVMM), "
-        "width=(int)%d, height=(int)%d, "
+        "width=%d, height=%d, "
         "format=(string)NV12, framerate=(fraction)%d/1 ! "
         "nvvidconv flip-method=%d ! "
-        "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
+        "video/x-raw, width=%d, height=%d, format=(string)BGRx ! "
         "videoconvert ! "
         "video/x-raw, format=(string)BGR ! appsink"
         % (
@@ -51,7 +51,7 @@ def gstreamer_pipeline(
 def main(args):
     print("ROS_MASTER_URI: " + os.environ['ROS_MASTER_URI'])
     rospy.init_node('image_capture', anonymous="false")
-    image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage)
+    image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage, 30)
     # Annoyingly bridge does not support compressed image
     bridge = CvBridge()
     print(gstreamer_pipeline(flip_method=2))
@@ -62,13 +62,13 @@ def main(args):
 
     if cap.isOpened():
         window_handle = cv2.namedWindow("CSI Camera", cv2.WINDOW_AUTOSIZE)
+
         while cv2.getWindowProperty("CSI Camera", 0) >= 0:
             ret_val, img = cap.read()
-            cv2.imshow("CSI Camera", img)
             while ret_val:
                 # this is slow
                 rval, frame = cap.read()
-                # cv2.imshow("Stream: " + frame)
+                # cv2.imshow("CSI Camera", img)
                 
                 if frame is not None:
                     frame = np.uint8(frame)
