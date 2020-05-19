@@ -16,7 +16,7 @@ from sensor_msgs.msg import CompressedImage
 VERBOSE="true"
 
 
-class image_feature:
+class image_converter:
     def __init__(self):
         self.image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage)
         # self.bridge = CvBridge()
