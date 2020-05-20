@@ -51,7 +51,7 @@ def gstreamer_pipeline(
 def main(args):
     print("ROS_MASTER_URI: " + os.environ['ROS_MASTER_URI'])
     rospy.init_node('image_capture', anonymous="false")
-    image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage, 30)
+    image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage, queue_size=30)
     # Annoyingly bridge does not support compressed image
     bridge = CvBridge()
     print(gstreamer_pipeline(flip_method=2))
