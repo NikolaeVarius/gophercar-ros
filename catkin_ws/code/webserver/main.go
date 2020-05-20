@@ -89,7 +89,7 @@ func mjpegCapture(ch chan *sensor_msgs.CompressedImage) {
 	// ticker := time.NewTicker(100)
 	for x := range ch {
 
-		buf, _ := gocv.IMDecode(x.Data)
+		buf, _ := gocv.IMDecode([]byte(x.Data))
 		stream.UpdateJPEG(buf)
 	}
 }
