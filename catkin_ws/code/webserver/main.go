@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"os"
 	"runtime"
-	"time"
 
 	"net/http"
 	_ "net/http/pprof"
@@ -20,6 +19,7 @@ import (
 	"github.com/aler9/goroslib"
 	"github.com/aler9/goroslib/msgs/sensor_msgs"
 	"github.com/hybridgroup/mjpeg"
+	"gocv.io/x/gocv"
 )
 
 var (
@@ -86,15 +86,10 @@ func main() {
 }
 
 func mjpegCapture(ch chan *sensor_msgs.CompressedImage) {
-	ticker := time.NewTicker(100)
-	go func() {
-		for x := range ch {
-			select {
-			case <-ticker.C:
-				fmt.Println(x.Header)
-				return
-			}
-		}
+	// ticker := time.NewTicker(100)
+	for x := range ch {
 
-	}()
+		buf, _ := gocv.IMDecode(".jpg", x.Data)
+		stream.UpdateJPEG(buf)
+	}
 }
