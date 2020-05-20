@@ -2,17 +2,18 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
+	"time"
+
 	"github.com/aler9/goroslib"
 	"github.com/aler9/goroslib/msgs"
 	"github.com/aler9/goroslib/msgs/std_msgs"
 	"github.com/cactus/go-statsd-client/statsd"
-	"log"
 	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/conn/i2c/i2creg"
 	"periph.io/x/periph/experimental/devices/pca9685"
 	"periph.io/x/periph/host"
-	"time"
 )
 
 // Steering Angle Parameters
@@ -45,28 +46,29 @@ var sc statsd.Statter
 const STATSD_HOST = "161.35.109.219"
 
 func init() {
-        // statsd
+	// statsd
 	var err error
-        config := &statsd.ClientConfig{
-                Address:       "161.35.109.219:8125",
-                Prefix:        "drive-node",
-                UseBuffered:   true,
-                FlushInterval: 300 * time.Millisecond,
-        }
-        sc, err = statsd.NewClientWithConfig(config)
-        if err != nil {
-                log.Fatal(err)
-        }
+	config := &statsd.ClientConfig{
+		Address:       "161.35.109.219:8125",
+		Prefix:        "drive-node",
+		UseBuffered:   true,
+		FlushInterval: 300 * time.Millisecond,
+	}
+	sc, err = statsd.NewClientWithConfig(config)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }
 
 func main() {
+	defer sc.Close()
+
 	_, err := host.Init()
 	if err != nil {
 		log.Fatal(err)
 	}
-	// defer closing of statsd client`
-        defer sc.Close()
+
 	// According to pinout of Jetson Nano, this is the i2c bus
 	bus, err := i2creg.Open("1")
 	if err != nil {
@@ -158,16 +160,16 @@ func main() {
 			select {
 			case <-ticker.C:
 				fmt.Printf("Recieved: %+v\n", x)
-	       		        scErr := sc.Inc("drive_node_recieved", 42, 0.0)
-		                if scErr!= nil {
-                                        panic(scErr)
-                                }
+				scErr := sc.Inc("drive_node_recieved", 42, 0.0)
+				if scErr != nil {
+					panic(scErr)
+				}
 
 				steeringPwm, steerErr := setSteering(x.Data[0])
 				_ = sc.Gauge("steering_pwm", int64(steeringPwm), 0.0)
-                                if steerErr != nil {
-                                        panic(steerErr)
-                                }
+				if steerErr != nil {
+					panic(steerErr)
+				}
 
 				throttlePwm, throttleErr := setThrottle(x.Data[3])
 				_ = sc.Gauge("throttle_pwm", int64(throttlePwm), 0.0)
@@ -211,9 +213,9 @@ func setSteering(steering msgs.Float64) (int, error) {
 func getThrottlePWMVal(val msgs.Float64) int {
 	var pwmVal int
 	//var scaledPwmVal int
-	
+
 	scaledPwmVal := normalize(float64(val), float64(MIN_THROTTLE_PULSE), float64(MAX_THROTTLE_PULSE))
-        fmt.Printf("%f converted to %f\n", val, scaledPwmVal)
+	fmt.Printf("%f converted to %f\n", val, scaledPwmVal)
 	// TODO; Fix this up so that going backward is a thing. Not 100% what that would look like
 	if val < 0 {
 		pwmVal = MIN_THROTTLE_PULSE
@@ -233,7 +235,7 @@ func getThrottlePWMVal(val msgs.Float64) int {
 
 func getSteeringPWMVal(val msgs.Float64) int {
 	var pwmVal int
-        scaledPwmVal := normalize(float64(val), float64(MAX_RIGHT_PULSE), float64(MAX_LEFT_PULSE))
+	scaledPwmVal := normalize(float64(val), float64(MAX_RIGHT_PULSE), float64(MAX_LEFT_PULSE))
 	fmt.Printf("%f convfrted to %f\n", val, scaledPwmVal)
 	if val < 0 {
 		//	fmt.Println("go right")
@@ -254,7 +256,7 @@ func getSteeringPWMVal(val msgs.Float64) int {
 }
 
 // converts -1/1 values to equivalent pwm values depending on scale
-func normalize(input, min, max float64)  float64 {
+func normalize(input, min, max float64) float64 {
 	i := input*(math.Max(min, max)-math.Min(min, max)) + math.Min(min, max)
 	if i < math.Min(min, max) {
 		return math.Min(min, max)
@@ -264,6 +266,7 @@ func normalize(input, min, max float64)  float64 {
 		return i
 	}
 }
+
 // copy pasta to try it out some time in the future
 func Every(t time.Duration, f func()) *time.Ticker {
 	ticker := time.NewTicker(t)
