@@ -77,7 +77,8 @@ func main() {
 	http.Handle("/", stream)
 
 	go func() {
-		http.ListenAndServe(host, nil)
+		err := http.ListenAndServe(host, nil)
+		panic(err)
 	}()
 
 	// fmt.Println("Capturing. Point your browser to " + host)
