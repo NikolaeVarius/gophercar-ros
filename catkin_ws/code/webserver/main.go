@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"time"
 
 	"net/http"
@@ -74,10 +75,14 @@ func main() {
 	go mjpegCapture(compressedImageMessages)
 	// start http server
 	http.Handle("/", stream)
-	http.ListenAndServe(host, nil)
+
+	go func() {
+		http.ListenAndServe(host, nil)
+	}()
+
 	// fmt.Println("Capturing. Point your browser to " + host)
-	// infty := make(chan int)
-	// <-infty
+	runtime.Goexit()
+
 }
 
 func mjpegCapture(ch chan *sensor_msgs.CompressedImage) {
