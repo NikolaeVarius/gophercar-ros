@@ -53,7 +53,7 @@ def main(args):
     rospy.init_node('image_capture', anonymous="false")
     image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage, queue_size=30)
     # Annoyingly bridge does not support compressed image
-    bridge = CvBridge()
+    # bridge = CvBridge()
     print(gstreamer_pipeline(flip_method=2))
     # rate = rospy.Rate(0.5)
 
