@@ -185,6 +185,10 @@ func main() {
 	<-infty
 }
 
+func joyButtonHandler(*std_msgs.Float64MultiArray) {
+	return
+}
+
 func convertStampedTwistedToAngle() {
 	return
 }
