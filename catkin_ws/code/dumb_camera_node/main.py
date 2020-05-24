@@ -92,7 +92,7 @@ def main(args):
             msg.format = "jpeg"
             msg.data = np.array(cv2.imencode('.jpg', img)[1]).tostring()
             frames = frames + 1
-            print(frames)
+            # print(frames)
             image_pub.publish(msg)
 
             # https://stackoverflow.com/questions/35372700/whats-0xff-for-in-cv2-waitkey1/39203128#39203128
