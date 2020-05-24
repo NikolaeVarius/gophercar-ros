@@ -86,7 +86,7 @@ class VideoShow:
 
     def show(self):
         while not self.stopped:
-            cv2.imshow("CSI Camera", self.frame)
+            cv2.imshow("CSI Camera", self.frame);
             keyCode = cv2.waitKey(30) & 0xFF
             # Kills on Escape
             if keyCode == 27:
@@ -121,6 +121,9 @@ def main():
     # if ENABLE_DISPLAY is true:
     show = VideoShow(stream.frame).start()
 
+    # Scaling
+    scale_percent = 50
+
     while True:
         if stream.stopped or show.stopped:
             stream.stop()
@@ -131,17 +134,23 @@ def main():
         if frame is not None:
             frame = np.uint8(frame)
 
+        # Resize Frame
+        width = int(frame.shape[1] * scale_percent / 100)
+        height = int(frame.shape[0] * scale_percent / 100)
+        dim = (width, height)
+        resized_frame = cv2.resize(frame, (width, height)) 
+
         # if DISPLAY_OUTPUT_METADATA:
         # To Display FPS
         currentTime = time.time()
         fps = getCurrentFPS(currentTime, previousTime)
         previousTime = currentTime
         fps_display_string = "FPS : %0.1f" % fps
-        cv2.putText(frame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
-        cv2.putText(frame, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+        cv2.putText(resized_frame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+        cv2.putText(resized_frame, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
         
         # Update Frame
-        show.frame = frame
+        show.frame = resized_frame
 
         # ROS Image
         msg = CompressedImage()
