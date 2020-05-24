@@ -68,6 +68,7 @@ class VideoStream:
             if not self.grabbed:
                 self.stop()
             else:
+                print("getting frame")
                 (self.grabbed, self.frame) = self.stream.read()
 
     def stop(self):
@@ -84,7 +85,9 @@ class VideoShow:
 
     def show(self):
         while not self.stopped:
+            print("showing frame")
             cv2.imshow("CSI Camera", self.frame)
+            keyCode = cv2.waitKey(30) & 0xFF
             if cv2.waitKey(1) == ord("q"):
                 self.stopped = True
 
