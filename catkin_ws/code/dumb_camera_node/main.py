@@ -58,6 +58,7 @@ def main(args):
     # rate = rospy.Rate(0.5)
 
     cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
+    # Keep track of how many frames hav been generated
     frames = 0
 
     if cap.isOpened():
@@ -66,22 +67,23 @@ def main(args):
         while cv2.getWindowProperty("CSI Camera", 0) >= 0:
             ret_val, img = cap.read()
                
-            while ret_val:
-                cv2.imshow("CSI Camera", img) 
-                if img is not None:
-                    img = np.uint8(img)
-                # image_message = bridge.cv2_to_imgmsg(frame, encoding="passthrough")
-                msg = CompressedImage()
-                msg.header.stamp = rospy.Time.now()
-                msg.format = "jpeg"
-                msg.data = np.array(cv2.imencode('.jpg', img)[1]).tostring()
-                frames = frames + 1
-                print(frames)
-                image_pub.publish(msg)
+            cv2.imshow("CSI Camera", img) 
+            if img is not None:
+                img = np.uint8(img)
+            # image_message = bridge.cv2_to_imgmsg(frame, encoding="passthrough")
+            msg = CompressedImage()
+            msg.header.stamp = rospy.Time.now()
+            msg.format = "jpeg"
+            msg.data = np.array(cv2.imencode('.jpg', img)[1]).tostring()
+            frames = frames + 1
+            print(frames)
+            image_pub.publish(msg)
 
-                keyCode = cv2.waitKey(30) & 0xFF
-                if keyCode == 27:
-                    break
+            # https://stackoverflow.com/questions/35372700/whats-0xff-for-in-cv2-waitkey1/39203128#39203128
+            keyCode = cv2.waitKey(30) & 0xFF
+            # Kills on Escape
+            if keyCode == 27:
+                break
         cap.release()
         cv2.destroyAllWindows()
     else:
