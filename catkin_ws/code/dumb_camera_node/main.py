@@ -120,9 +120,10 @@ def main(args):
         fps = getCurrentFPS(currentTime, previousTime)
         previousTime = currentTime
         fps_display_string = "FPS : %0.1f" % fps
-
         cv2.putText(frame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
         cv2.putText(frame, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+        
+        # Update Frame
         show.frame = frame
 
         # ROS Image
@@ -138,7 +139,6 @@ def main(args):
         # Kills on Escape
         if keyCode == 27:
             break
-    # frame.release()
     cv2.destroyAllWindows()
 
 
