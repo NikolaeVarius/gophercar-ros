@@ -20,7 +20,7 @@ from scipy.ndimage import filters
 from sensor_msgs.msg import CompressedImage
 VERBOSE="true"
 # Toggle if a window showing camera output should pop up
-SHOW__CAMERA="true"
+SHOW_OUTPUT_WINDOW="true"
 # Toggle convering to greyscale
 GRAYSCALE="false"
 
