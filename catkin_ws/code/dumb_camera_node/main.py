@@ -81,8 +81,8 @@ def main(args):
             fps = 1/(elapsedTime)
             fps_display_string = "FPS : %0.1f" % fps
 
-            cv2.putText(img, fps_display_string, (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
-            cv2.putText(img, "Frame: " + str(frames), (0, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
+            cv2.putText(img, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+            cv2.putText(img, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
 
             cv2.imshow("CSI Camera", img) 
 
