@@ -87,8 +87,11 @@ class VideoShow:
         while not self.stopped:
             print("showing frame")
             cv2.imshow("CSI Camera", self.frame)
+            
             keyCode = cv2.waitKey(30) & 0xFF
-            if cv2.waitKey(1) == ord("q"):
+            # Kills on Escape
+            if keyCode == 27:
+                break
                 self.stopped = True
 
     def stop(self):
@@ -135,10 +138,10 @@ def main(args):
         image_pub.publish(msg)
 
         # https://stackoverflow.com/questions/35372700/whats-0xff-for-in-cv2-waitkey1/39203128#39203128
-        keyCode = cv2.waitKey(30) & 0xFF
-        # Kills on Escape
-        if keyCode == 27:
-            break
+        # keyCode = cv2.waitKey(30) & 0xFF
+        # # Kills on Escape
+        # if keyCode == 27:
+        #     break
     cv2.destroyAllWindows()
 
 
