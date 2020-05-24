@@ -10,6 +10,7 @@ import sys, time
 import roslib
 import rospy
 import os
+import argparse
 from threading import Thread
 # from queue import Queue
 
@@ -21,6 +22,7 @@ from sensor_msgs.msg import CompressedImage
 VERBOSE="true"
 # Toggle if a window showing camera output should pop up
 SHOW_OUTPUT_WINDOW="true"
+ENABLE_DISPLAY="true"
 # Toggle convering to greyscale
 GRAYSCALE="false"
 
@@ -100,7 +102,14 @@ class VideoShow:
 def getCurrentFPS(currentTime, previousTime):
         return 1/(currentTime - previousTime)
 
-def main(args):
+def main():
+    # ap = argparse.ArgumentParser()
+    # ap.add_argument("--enable-display", "-e", default="true", help="Activate OpenCV Display Window")
+    # args = vars(ap.parse_args())
+
+    # if args["enable-display"] == "false":
+    #     ENABLE_DISPLAY = "false"
+
     print("ROS_MASTER_URI: " + os.environ['ROS_MASTER_URI'])
     rospy.init_node('image_capture', anonymous="false")
     image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage, queue_size=30)
@@ -111,6 +120,8 @@ def main(args):
     previousTime = 0
 
     stream = VideoStream().start()
+
+    # if ENABLE_DISPLAY is true:
     show = VideoShow(stream.frame).start()
 
     while True:
@@ -123,6 +134,7 @@ def main(args):
         if frame is not None:
             frame = np.uint8(frame)
 
+        # if DISPLAY_OUTPUT_METADATA:
         # To Display FPS
         currentTime = time.time()
         fps = getCurrentFPS(currentTime, previousTime)
@@ -157,4 +169,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-  main(sys.argv)
+    main()
