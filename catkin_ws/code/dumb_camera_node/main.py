@@ -60,19 +60,32 @@ def main(args):
     cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
     # Keep track of how many frames hav been generated
     frames = 0
+    # Keep track of FPS emitted by camera
+    previousTime = 0
 
     if cap.isOpened():
         window_handle = cv2.namedWindow("CSI Camera", cv2.WINDOW_AUTOSIZE)
         frame_size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-        print(frame_size)
-        print(cv2.CAP_PROP_FPS)
+        print("Frame Dimensions: " + str(frame_size))
+        print("Configured FPS Output: " + str(cv2.CAP_PROP_FPS))
         
         while cv2.getWindowProperty("CSI Camera", 0) >= 0:
             ret_val, img = cap.read()
-               
-            cv2.imshow("CSI Camera", img) 
             if img is not None:
                 img = np.uint8(img)
+
+            # To Display FPS
+            currentTime = time.time()
+            elapsedTime = currentTime - previousTime
+            previousTime = currentTime
+            fps = 1/(elapsedTime)
+            fps_display_string = "FPS : %0.1f" % fps
+
+            cv2.putText(img, fps_display_string, (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
+            cv2.putText(img, "Frame: " + str(frames), (0, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
+
+            cv2.imshow("CSI Camera", img) 
+
             # image_message = bridge.cv2_to_imgmsg(frame, encoding="passthrough")
             msg = CompressedImage()
             msg.header.stamp = rospy.Time.now()
