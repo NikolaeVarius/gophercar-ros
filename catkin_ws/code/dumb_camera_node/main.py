@@ -71,6 +71,27 @@ class VideoStream:
     def stop(self):
         self.stopped = True
 
+class VideoShow:
+    def __init__(self, frame=None):
+        self.frame = frame
+        self.stopped = False
+
+    def start(self):
+        Thread(target=self.show, args=()).start()
+        return self
+
+    def show(self):
+        while not self.stopped:
+            cv2.imshow("CSI Camera", self.frame)
+            if cv2.waitKey(1) == ord("q"):
+                self.stopped = True
+
+    def stop(self):
+        self.stopped = True
+
+def getCurrentFPS(currentTime, previousTime):
+        return 1/(currentTime - previousTime)
+
 def main(args):
     print("ROS_MASTER_URI: " + os.environ['ROS_MASTER_URI'])
     rospy.init_node('image_capture', anonymous="false")
@@ -82,45 +103,38 @@ def main(args):
     previousTime = 0
 
     stream = VideoStream().start()
+    show = VideoShow(stream.frame).start()
 
-    # if cap.isOpened():
     while True:
-        window_handle = cv2.namedWindow("CSI Camera", cv2.WINDOW_AUTOSIZE)
-        # frame_size = (int(frame.get(cv2.CAP_PROP_FRAME_WIDTH)), int(frame.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-        # print("Frame Dimensions: " + str(frame_size))
-        print("Configured FPS Output: " + str(cv2.CAP_PROP_FPS))
-        
-        while cv2.getWindowProperty("CSI Camera", 0) >= 0:
-            frame = stream.frame
-            if frame is not None:
-                frame = np.uint8(frame)
+        frame = stream.frame
+        if frame is not None:
+            frame = np.uint8(frame)
 
-            # To Display FPS
-            currentTime = time.time()
-            elapsedTime = currentTime - previousTime
-            previousTime = currentTime
-            fps = 1/(elapsedTime)
-            fps_display_string = "FPS : %0.1f" % fps
+        # To Display FPS
+        currentTime = time.time()
+        fps = getCurrentFPS(currentTime, previousTime)
+        previousTime = currentTime
+        fps_display_string = "FPS : %0.1f" % fps
 
-            cv2.putText(frame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
-            cv2.putText(frame, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+        cv2.putText(frame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+        cv2.putText(frame, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+        show.frame = frame
+        # cv2.imshow("CSI Camera", frame)
 
-            cv2.imshow("CSI Camera", frame) 
+        msg = CompressedImage()
+        msg.header.stamp = rospy.Time.now()
+        msg.format = "jpeg"
+        msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
+        frames = frames + 1
+        image_pub.publish(msg)
 
-            msg = CompressedImage()
-            msg.header.stamp = rospy.Time.now()
-            msg.format = "jpeg"
-            msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
-            frames = frames + 1
-            image_pub.publish(msg)
-
-            # https://stackoverflow.com/questions/35372700/whats-0xff-for-in-cv2-waitkey1/39203128#39203128
-            keyCode = cv2.waitKey(30) & 0xFF
-            # Kills on Escape
-            if keyCode == 27:
-                break
-        frame.release()
-        cv2.destroyAllWindows()
+        # https://stackoverflow.com/questions/35372700/whats-0xff-for-in-cv2-waitkey1/39203128#39203128
+        keyCode = cv2.waitKey(30) & 0xFF
+        # Kills on Escape
+        if keyCode == 27:
+            break
+    # frame.release()
+    cv2.destroyAllWindows()
 
 
     try:
