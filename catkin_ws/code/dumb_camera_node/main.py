@@ -9,6 +9,8 @@ import sys, time
 import roslib
 import rospy
 import os
+from threading import Thread
+# from queue import Queue
 
 from cv_bridge import CvBridge
 import numpy as np
@@ -48,31 +50,50 @@ def gstreamer_pipeline(
         )
     )
 
+
+class VideoStream:
+    def __init__(self, src=0):
+        self.stream = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
+        (self.grabbed, self.frame) = self.stream.read()
+        self.stopped = False
+
+    def start(self):    
+        Thread(target=self.get, args=()).start()
+        return self
+
+    def get(self):
+        while not self.stopped:
+            if not self.grabbed:
+                self.stop()
+            else:
+                (self.grabbed, self.frame) = self.stream.read()
+
+    def stop(self):
+        self.stopped = True
+
 def main(args):
     print("ROS_MASTER_URI: " + os.environ['ROS_MASTER_URI'])
     rospy.init_node('image_capture', anonymous="false")
     image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage, queue_size=30)
-    # Annoyingly bridge does not support compressed image
-    # bridge = CvBridge()
     print(gstreamer_pipeline(flip_method=2))
-    # rate = rospy.Rate(0.5)
-
-    cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
     # Keep track of how many frames hav been generated
     frames = 0
     # Keep track of FPS emitted by camera
     previousTime = 0
 
-    if cap.isOpened():
+    stream = VideoStream().start()
+
+    # if cap.isOpened():
+    while True:
         window_handle = cv2.namedWindow("CSI Camera", cv2.WINDOW_AUTOSIZE)
-        frame_size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-        print("Frame Dimensions: " + str(frame_size))
+        # frame_size = (int(frame.get(cv2.CAP_PROP_FRAME_WIDTH)), int(frame.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        # print("Frame Dimensions: " + str(frame_size))
         print("Configured FPS Output: " + str(cv2.CAP_PROP_FPS))
         
         while cv2.getWindowProperty("CSI Camera", 0) >= 0:
-            ret_val, img = cap.read()
-            if img is not None:
-                img = np.uint8(img)
+            frame = stream.frame
+            if frame is not None:
+                frame = np.uint8(frame)
 
             # To Display FPS
             currentTime = time.time()
@@ -81,18 +102,16 @@ def main(args):
             fps = 1/(elapsedTime)
             fps_display_string = "FPS : %0.1f" % fps
 
-            cv2.putText(img, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
-            cv2.putText(img, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+            cv2.putText(frame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+            cv2.putText(frame, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
 
-            cv2.imshow("CSI Camera", img) 
+            cv2.imshow("CSI Camera", frame) 
 
-            # image_message = bridge.cv2_to_imgmsg(frame, encoding="passthrough")
             msg = CompressedImage()
             msg.header.stamp = rospy.Time.now()
             msg.format = "jpeg"
-            msg.data = np.array(cv2.imencode('.jpg', img)[1]).tostring()
+            msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
             frames = frames + 1
-            # print(frames)
             image_pub.publish(msg)
 
             # https://stackoverflow.com/questions/35372700/whats-0xff-for-in-cv2-waitkey1/39203128#39203128
@@ -100,10 +119,9 @@ def main(args):
             # Kills on Escape
             if keyCode == 27:
                 break
-        cap.release()
+        frame.release()
         cv2.destroyAllWindows()
-    else:
-        print("Unable to open camera")
+
 
     try:
         rospy.spin()
