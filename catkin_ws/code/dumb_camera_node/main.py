@@ -22,11 +22,11 @@ SHOW__CAMERA="true"
 GRAYSCALE="false"
 
 def gstreamer_pipeline(
-    capture_width=640,
-    capture_height=480,
-    display_width=640,
-    display_height=480,
-    framerate=30,
+    capture_width=1280,
+    capture_height=720,
+    display_width=1280,
+    display_height=720,
+    framerate=60,
     flip_method=2,
 ):
     return (
@@ -63,7 +63,10 @@ def main(args):
 
     if cap.isOpened():
         window_handle = cv2.namedWindow("CSI Camera", cv2.WINDOW_AUTOSIZE)
-
+        frame_size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        print(frame_size)
+        print(cv2.CAP_PROP_FPS)
+        
         while cv2.getWindowProperty("CSI Camera", 0) >= 0:
             ret_val, img = cap.read()
                
