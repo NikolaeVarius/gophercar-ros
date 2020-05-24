@@ -91,8 +91,8 @@ class VideoShow:
             keyCode = cv2.waitKey(30) & 0xFF
             # Kills on Escape
             if keyCode == 27:
-                break
                 self.stopped = True
+                break
 
     def stop(self):
         self.stopped = True
@@ -114,6 +114,11 @@ def main(args):
     show = VideoShow(stream.frame).start()
 
     while True:
+        if stream.stopped or show.stopped:
+            stream.stop()
+            show.stop()
+            break
+
         frame = stream.frame
         if frame is not None:
             frame = np.uint8(frame)
