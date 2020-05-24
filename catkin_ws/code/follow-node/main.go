@@ -9,19 +9,12 @@ import (
 )
 
 var subTopic *goroslib.Subscriber
+var window = gocv.NewWindow("Face Detect")
 
 func main() {
 	xmlFile := "./haarcascade_frontalface_default.xml"
 	imgStream := make(chan *sensor_msgs.CompressedImage, 100)
-
-	// window := gocv.NewWindow("Face Detect")
-	// defer window.Close()
-
-	// img := gocv.NewMat()
-	// defer img.Close()
-
-	// color for the rect when faces detected
-	// blue := color.RGBA{0, 0, 255, 0}
+	defer window.Close()
 
 	// load classifier to recognize faces
 	classifier := gocv.NewCascadeClassifier()
@@ -45,7 +38,7 @@ func main() {
 	// Apparently can't subscribe directly to compressed image topic
 	subTopic, err = goroslib.NewSubscriber(goroslib.SubscriberConf{
 		Node:  n,
-		Topic: "/output/image_raw",
+		Topic: "/output/image_raw/compressed",
 		Callback: func(msg *sensor_msgs.CompressedImage) {
 			imgStream <- msg
 		},
@@ -56,35 +49,58 @@ func main() {
 	fmt.Println("Connected to Subscriber Topic")
 	defer subTopic.Close()
 
-	// go func() {
-	// 	for img := range imgStream {
-	// 		fmt.Println(len(img.Data))
-	// 	}
-
-	// }()
+	go func() {
+		for img := range imgStream {
+			fmt.Println("moar")
+			showWindow(img)
+		}
+	}()
 	infty := make(chan int)
 	<-infty
-		for {
+	// for {
 
-			if img.Empty() {
-				continue
-			}
+	// 	if img.Empty() {
+	// 		continue
+	// 	}
 
-			rects := classifier.DetectMultiScale(img)
-			fmt.Printf("found %d faces\n", len(rects))
+	// 	rects := classifier.DetectMultiScale(img)
+	// 	fmt.Printf("found %d faces\n", len(rects))
 
-			for _, r := range rects {
-				gocv.Rectangle(&img, r, blue, 3)
+	// 	for _, r := range rects {
+	// 		gocv.Rectangle(&img, r, blue, 3)
 
-				size := gocv.GetTextSize("Human", gocv.FontHersheyPlain, 1.2, 2)
-				pt := image.Pt(r.Min.X+(r.Min.X/2)-(size.X/2), r.Min.Y-2)
-				gocv.PutText(&img, "Human", pt, gocv.FontHersheyPlain, 1.2, blue, 2)
-			}
+	// 		size := gocv.GetTextSize("Human", gocv.FontHersheyPlain, 1.2, 2)
+	// 		pt := image.Pt(r.Min.X+(r.Min.X/2)-(size.X/2), r.Min.Y-2)
+	// 		gocv.PutText(&img, "Human", pt, gocv.FontHersheyPlain, 1.2, blue, 2)
+	// 	}
 
-			window.IMShow(img)
-			if window.WaitKey(20) >= 0 {
-				break
-			}
-		}
+	// }
+}
+
+func showWindow(img *sensor_msgs.CompressedImage) {
+	imgData := img.Data
+	fmt.Println("Processing Frame")
+
+	imgBytes := make([]byte, len(imgData))
+	for i := 0; i < len(imgData); i++ {
+		imgBytes[i] = uint8(imgData[i])
 	}
+
+	imgMat, err := gocv.NewMatFromBytes(640, 360, gocv.MatTypeCV8UC3, imgBytes)
+	fmt.Println(imgBytes)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if imgMat.Empty() {
+		return
+	}
+
+	window.IMShow(imgMat)
+	window.WaitKey(1)
+
+	// color for the rect when faces detected
+	// blue := color.RGBA{0, 0, 255, 0}
+	// fmt.Println(img)
+	fmt.Println("done")
+	return
 }
