@@ -4,6 +4,7 @@
 ## https://github.com/JetsonHacksNano/CSI-Camera/blob/master/simple_camera.py
 ## http://wiki.ros.org/rospy_tutorials/Tutorials/WritingImagePublisherSubscriber
 ## http://wiki.ros.org/cv_bridge/Tutorials/ConvertingBetweenROSImagesAndOpenCVImagesPython
+## https://github.com/nrsyed/computer-vision
 import cv2
 import sys, time
 import roslib
@@ -22,6 +23,7 @@ VERBOSE="true"
 SHOW__CAMERA="true"
 # Toggle convering to greyscale
 GRAYSCALE="false"
+
 
 def gstreamer_pipeline(
     capture_width=1280,
@@ -119,8 +121,8 @@ def main(args):
         cv2.putText(frame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
         cv2.putText(frame, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
         show.frame = frame
-        # cv2.imshow("CSI Camera", frame)
 
+        # ROS Image
         msg = CompressedImage()
         msg.header.stamp = rospy.Time.now()
         msg.format = "jpeg"
