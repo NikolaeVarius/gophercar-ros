@@ -42,9 +42,10 @@ func main() {
 	fmt.Println("Connected to Master")
 	defer n.Close()
 
+	// Apparently can't subscribe directly to compressed image topic
 	subTopic, err = goroslib.NewSubscriber(goroslib.SubscriberConf{
 		Node:  n,
-		Topic: "/output/image_raw/compressed",
+		Topic: "/output/image_raw",
 		Callback: func(msg *sensor_msgs.CompressedImage) {
 			imgStream <- msg
 		},
@@ -53,7 +54,6 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("Connected to Subscriber Topic")
-
 	defer subTopic.Close()
 
 	// go func() {
@@ -64,27 +64,27 @@ func main() {
 	// }()
 	infty := make(chan int)
 	<-infty
-	// 	for {
+		for {
 
-	// 		if img.Empty() {
-	// 			continue
-	// 		}
+			if img.Empty() {
+				continue
+			}
 
-	// 		rects := classifier.DetectMultiScale(img)
-	// 		fmt.Printf("found %d faces\n", len(rects))
+			rects := classifier.DetectMultiScale(img)
+			fmt.Printf("found %d faces\n", len(rects))
 
-	// 		for _, r := range rects {
-	// 			gocv.Rectangle(&img, r, blue, 3)
+			for _, r := range rects {
+				gocv.Rectangle(&img, r, blue, 3)
 
-	// 			size := gocv.GetTextSize("Human", gocv.FontHersheyPlain, 1.2, 2)
-	// 			pt := image.Pt(r.Min.X+(r.Min.X/2)-(size.X/2), r.Min.Y-2)
-	// 			gocv.PutText(&img, "Human", pt, gocv.FontHersheyPlain, 1.2, blue, 2)
-	// 		}
+				size := gocv.GetTextSize("Human", gocv.FontHersheyPlain, 1.2, 2)
+				pt := image.Pt(r.Min.X+(r.Min.X/2)-(size.X/2), r.Min.Y-2)
+				gocv.PutText(&img, "Human", pt, gocv.FontHersheyPlain, 1.2, blue, 2)
+			}
 
-	// 		window.IMShow(img)
-	// 		if window.WaitKey(20) >= 0 {
-	// 			break
-	// 		}
-	// 	}
-	// }
+			window.IMShow(img)
+			if window.WaitKey(20) >= 0 {
+				break
+			}
+		}
+	}
 }
