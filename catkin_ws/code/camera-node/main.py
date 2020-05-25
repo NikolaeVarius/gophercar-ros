@@ -24,10 +24,10 @@ VERBOSE=True
 LOG_AFTER_FRAMES=0 # Number of frames per log emitted reporting number of frames processed. Setting this to 0 should disable it
 
 # Toggle if a window showing camera output should pop up
-ENABLE_DISPLAY=False
+ENABLE_DISPLAY=True
 
 # Image Frame Settings
-GRAYSCALE=False # Convert to greyscale
+GRAYSCALE=True # Convert to greyscale
 SCALING_PERCENT=50 # How much to scale image size
 ENABLE_FPS=True
 
@@ -154,18 +154,23 @@ def main():
             continue
 
         # Cut down resolution of frame
-        resizedFrame = resizeFrame(frame, SCALING_PERCENT)
+        if SCALING_PERCENT != 100:
+            frame = resizeFrame(frame, SCALING_PERCENT)
+
+        # Convert to Greyscale
+        if GRAYSCALE is True:
+            frame = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
 
         if ENABLE_DISPLAY is True and ENABLE_FPS is True:
             currentTime = time.time()
             fps = getCurrentFPS(currentTime, previousTime)
             previousTime = currentTime
             fps_display_string = "FPS : %0.1f" % fps
-            cv2.putText(resizedFrame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
-            cv2.putText(resizedFrame, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+            cv2.putText(frame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+            cv2.putText(frame, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
         
         # Update Frame
-        show.frame = resizedFrame
+        show.frame = frame
 
         # ROS Image
         msg = CompressedImage()
@@ -174,7 +179,6 @@ def main():
         msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
         image_pub.publish(msg)
 
-        
         frames = frames + 1
         if LOG_AFTER_FRAMES != 0 and frames % LOG_AFTER_FRAMES == 0:
             print("Processed " + str(LOG_AFTER_FRAMES) + " frames for a total of" + str(frames))
