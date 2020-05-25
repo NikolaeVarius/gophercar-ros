@@ -135,8 +135,12 @@ def main():
             break
 
         frame = stream.frame
+        
         if frame is not None:
             frame = np.uint8(frame)
+        else:
+            print("Recieved null frame. Skipping")
+            continue
 
         # Cut down resolution of frame
         resizedFrame = resizeFrame(frame, 50)
