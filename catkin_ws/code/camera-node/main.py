@@ -21,7 +21,7 @@ from scipy.ndimage import filters
 from sensor_msgs.msg import CompressedImage
 # Logging
 VERBOSE=True
-LOG_AFTER_FRAMES=100 # Number of frames per log emitted reporting number of frames processed
+LOG_AFTER_FRAMES=0 # Number of frames per log emitted reporting number of frames processed. Setting this to 0 should disable it
 
 # Toggle if a window showing camera output should pop up
 SHOW_OUTPUT_WINDOW=True
@@ -177,7 +177,7 @@ def main():
 
         
         frames = frames + 1
-        if frames % LOG_AFTER_FRAMES == 0:
+        if LOG_AFTER_FRAMES != 0 and frames % LOG_AFTER_FRAMES == 0:
             print("Processed " + str(LOG_AFTER_FRAMES) + " frames for a total of" + str(frames))
 
         # https://stackoverflow.com/questions/35372700/whats-0xff-for-in-cv2-waitkey1/39203128#39203128
