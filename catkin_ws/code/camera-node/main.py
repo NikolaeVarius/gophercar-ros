@@ -113,9 +113,6 @@ def main():
 
     # if args["enable-display"] == "false":
     #     ENABLE_DISPLAY = "false"
-
-    print("ROS_MASTER_URI: " + os.environ['ROS_MASTER_URI'])
-    rospy.init_node('image_capture', anonymous="false")
     image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage, queue_size=30)
     print(gstreamer_pipeline(flip_method=2))
     # Keep track of how many frames hav been generated
@@ -179,4 +176,6 @@ def main():
 
 
 if __name__ == "__main__":
+    print("ROS_MASTER_URI: " + os.environ['ROS_MASTER_URI'])
+    rospy.init_node('camera-node', anonymous="false")
     main()
