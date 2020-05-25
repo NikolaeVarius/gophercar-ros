@@ -156,7 +156,7 @@ def main():
         # Cut down resolution of frame
         resizedFrame = resizeFrame(frame, SCALING_PERCENT)
 
-        if ENABLE_FPS is True and ENABLE_DISPLAY is True:
+        if ENABLE_DISPLAY is True and ENABLE_FPS is True:
             currentTime = time.time()
             fps = getCurrentFPS(currentTime, previousTime)
             previousTime = currentTime
