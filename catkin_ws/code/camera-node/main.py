@@ -99,6 +99,13 @@ class VideoShow:
 def getCurrentFPS(currentTime, previousTime):
         return 1/(currentTime - previousTime)
 
+
+def resizeFrame(frame, scalePercent=100):
+    newWidth = int(frame.shape[1] * scalePercent / 100)
+    newHeight = int(frame.shape[0] * scalePercent / 100)
+    return cv2.resize(frame, (newWidth, newHeight))
+    
+
 def main():
     # ap = argparse.ArgumentParser()
     # ap.add_argument("--enable-display", "-e", default="true", help="Activate OpenCV Display Window")
@@ -121,9 +128,6 @@ def main():
     # if ENABLE_DISPLAY is true:
     show = VideoShow(stream.frame).start()
 
-    # Scaling
-    scale_percent = 50
-
     while True:
         if stream.stopped or show.stopped:
             stream.stop()
@@ -134,11 +138,8 @@ def main():
         if frame is not None:
             frame = np.uint8(frame)
 
-        # Resize Frame
-        width = int(frame.shape[1] * scale_percent / 100)
-        height = int(frame.shape[0] * scale_percent / 100)
-        dim = (width, height)
-        resized_frame = cv2.resize(frame, (width, height)) 
+        # Cut down resolution of frame
+        resizedFrame = resizeFrame(frame, 50)
 
         # if DISPLAY_OUTPUT_METADATA:
         # To Display FPS
@@ -146,11 +147,11 @@ def main():
         fps = getCurrentFPS(currentTime, previousTime)
         previousTime = currentTime
         fps_display_string = "FPS : %0.1f" % fps
-        cv2.putText(resized_frame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
-        cv2.putText(resized_frame, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+        cv2.putText(resizedFrame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+        cv2.putText(resizedFrame, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
         
         # Update Frame
-        show.frame = resized_frame
+        show.frame = resizedFrame
 
         # ROS Image
         msg = CompressedImage()
