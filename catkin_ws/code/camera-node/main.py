@@ -19,7 +19,10 @@ import numpy as np
 from scipy.ndimage import filters
 
 from sensor_msgs.msg import CompressedImage
+# Logging
 VERBOSE=True
+LOG_AFTER_FRAMES=100 # Number of frames per log emitted reporting number of frames processed
+
 # Toggle if a window showing camera output should pop up
 SHOW_OUTPUT_WINDOW=True
 ENABLE_DISPLAY=True
@@ -27,7 +30,7 @@ ENABLE_DISPLAY=True
 # Image Frame Settings
 GRAYSCALE=False # Convert to greyscale
 SCALING_PERCENT=50 # How much to scale image size
-ENABLE_FPS=False
+ENABLE_FPS=True
 
 # TODO?
 # Cut Percentage off each side of an image. This is useful for cutting out uneeded image data a.k.a anything not road.
@@ -170,8 +173,12 @@ def main():
         msg.header.stamp = rospy.Time.now()
         msg.format = "jpeg"
         msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
-        frames = frames + 1
         image_pub.publish(msg)
+
+        
+        frames = frames + 1
+        if frames % LOG_AFTER_FRAMES == 0:
+            print("Processed " + str(LOG_AFTER_FRAMES) + " frames for a total of" + str(frames))
 
         # https://stackoverflow.com/questions/35372700/whats-0xff-for-in-cv2-waitkey1/39203128#39203128
         # keyCode = cv2.waitKey(30) & 0xFF
