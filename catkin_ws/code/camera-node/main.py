@@ -19,13 +19,14 @@ import numpy as np
 from scipy.ndimage import filters
 
 from sensor_msgs.msg import CompressedImage
-VERBOSE="true"
+VERBOSE=True
 # Toggle if a window showing camera output should pop up
-SHOW_OUTPUT_WINDOW="true"
-ENABLE_DISPLAY="true"
-# Toggle convering to greyscale
-GRAYSCALE="false"
-
+SHOW_OUTPUT_WINDOW=True
+ENABLE_DISPLAY=True
+# Image Frame Settings
+GRAYSCALE=False # Convert to greyscale
+SCALING_PERCENT=50 # How much to scale image size
+ENABLE_FPS=False
 
 def gstreamer_pipeline(
     capture_width=1280,
@@ -53,7 +54,6 @@ def gstreamer_pipeline(
             display_height,
         )
     )
-
 
 class VideoStream:
     def __init__(self, src=0):
@@ -143,16 +143,15 @@ def main():
             continue
 
         # Cut down resolution of frame
-        resizedFrame = resizeFrame(frame, 50)
+        resizedFrame = resizeFrame(frame, SCALING_PERCENT)
 
-        # if DISPLAY_OUTPUT_METADATA:
-        # To Display FPS
-        currentTime = time.time()
-        fps = getCurrentFPS(currentTime, previousTime)
-        previousTime = currentTime
-        fps_display_string = "FPS : %0.1f" % fps
-        cv2.putText(resizedFrame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
-        cv2.putText(resizedFrame, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+        if ENABLE_FPS is True:
+            currentTime = time.time()
+            fps = getCurrentFPS(currentTime, previousTime)
+            previousTime = currentTime
+            fps_display_string = "FPS : %0.1f" % fps
+            cv2.putText(resizedFrame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+            cv2.putText(resizedFrame, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
         
         # Update Frame
         show.frame = resizedFrame
