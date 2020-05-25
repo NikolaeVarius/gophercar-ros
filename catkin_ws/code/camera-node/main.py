@@ -29,13 +29,14 @@ GRAYSCALE=False # Convert to greyscale
 SCALING_PERCENT=50 # How much to scale image size
 ENABLE_FPS=False
 
+# TODO?
 # Cut Percentage off each side of an image. This is useful for cutting out uneeded image data a.k.a anything not road.
 # Generally its probably safe to remove a bit of the top of the image
-CUT_LEFT_IMAGE=0 #
-CUT_RIGHT_IMAGE=0
-CUT_TOP_IMAGE=0
-CUT_LEFT_IMAGE=0
-SHOW_CUT_LINES=False
+# CUT_LEFT_IMAGE=0 #
+# CUT_RIGHT_IMAGE=0
+# CUT_TOP_IMAGE=0
+# CUT_LEFT_IMAGE=0
+# SHOW_CUT_LINES=False
 
 
 def gstreamer_pipeline(
