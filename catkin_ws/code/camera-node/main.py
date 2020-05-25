@@ -23,10 +23,20 @@ VERBOSE=True
 # Toggle if a window showing camera output should pop up
 SHOW_OUTPUT_WINDOW=True
 ENABLE_DISPLAY=True
+
 # Image Frame Settings
 GRAYSCALE=False # Convert to greyscale
 SCALING_PERCENT=50 # How much to scale image size
 ENABLE_FPS=False
+
+# Cut Percentage off each side of an image. This is useful for cutting out uneeded image data a.k.a anything not road.
+# Generally its probably safe to remove a bit of the top of the image
+CUT_LEFT_IMAGE=0 #
+CUT_RIGHT_IMAGE=0
+CUT_TOP_IMAGE=0
+CUT_LEFT_IMAGE=0
+SHOW_CUT_LINES=False
+
 
 def gstreamer_pipeline(
     capture_width=1280,
