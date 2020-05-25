@@ -121,9 +121,10 @@ def main():
     previousTime = 0
 
     stream = VideoStream().start()
+    show = VideoShow(stream.frame)
 
-    # if ENABLE_DISPLAY is true:
-    show = VideoShow(stream.frame).start()
+    if ENABLE_DISPLAY is True:
+        show.start()
 
     while True:
         if stream.stopped or show.stopped:
@@ -142,7 +143,7 @@ def main():
         # Cut down resolution of frame
         resizedFrame = resizeFrame(frame, SCALING_PERCENT)
 
-        if ENABLE_FPS is True:
+        if ENABLE_FPS is True and ENABLE_DISPLAY is True:
             currentTime = time.time()
             fps = getCurrentFPS(currentTime, previousTime)
             previousTime = currentTime
@@ -177,5 +178,5 @@ def main():
 
 if __name__ == "__main__":
     print("ROS_MASTER_URI: " + os.environ['ROS_MASTER_URI'])
-    rospy.init_node('camera-node', anonymous="false")
+    rospy.init_node('camera0', anonymous="false")
     main()
