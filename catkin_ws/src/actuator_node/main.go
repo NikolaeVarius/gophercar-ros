@@ -36,7 +36,7 @@ const THROTTLE_STEP = 10
 
 // ROS Paramaters
 const ROS_MASTER = "donkeycar"
-const ROS_NODE_NAME = ""
+const NODE_NAME = "/actuator"
 const ACTUATOR_TOPIC = "/actuator"
 
 var pca *pca9685.Dev
@@ -47,8 +47,6 @@ const STATSD_HOST = "161.35.109.219"
 const STATSD_PORT = "8125"
 
 var STATSD_URL = STATSD_HOST + ":" + STATSD_PORT
-
-const NODE_NAME = "actuator"
 
 func init() {
 	// statsd
@@ -108,19 +106,8 @@ func main() {
 
 	actuatorMessages := make(chan *std_msgs.Float64MultiArray, 100)
 
-	n, err := goroslib.NewNode(goroslib.NodeConf{
-		Name:       "/gophercar-actuator",
-		MasterHost: ROS_MASTER,
-	})
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Connected to Master: " + ROS_MASTER)
-	defer n.Close()
-
 	// Subscribe to actuator topic to process joy/keypresses
-	subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{
-		Node:  n,
+	subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{Node: n,
 		Topic: ACTUATOR_TOPIC,
 		Callback: func(msg *std_msgs.Float64MultiArray) {
 			actuatorMessages <- msg
