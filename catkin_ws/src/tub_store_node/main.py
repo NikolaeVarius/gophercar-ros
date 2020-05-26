@@ -7,7 +7,10 @@ import rospy
 import sys
 from sensor_msgs.msg import CompressedImage, CameraInfo, Joy
 from cv_bridge import CvBridge, CvBridgeError
-import cv2 
+import cv2
+import json
+from rospy_message_converter import json_message_converter
+
 
 # from cv_bridge.boost.cv_bridge_boost import getCvType
 
@@ -22,12 +25,22 @@ def callback(image, joy):
     joy_timestamp = joy.header.stamp.secs
     
     try:
+        # handle image
         cv2_img = bridge.compressed_imgmsg_to_cv2(image, "bgr8")
-    except CvBridgeError as e:
-        print(e)
-    else:
         image_filename = image_path + str(img_timestamp) + "-image.jpg"
         cv2.imwrite(image_filename, cv2_img)
+
+        # handle file
+        json_str = json_message_converter.convert_ros_message_to_json(joy)
+        json_filename = joy_path + str(img_timestamp) + ".json" 
+        with open(json_filename, 'w') as json_file:
+            json.dump(json_str, json_file)
+    except CvBridgeError as e:
+        print(e)
+    except:
+        sys.exit(1)
+
+
 
 def main(args):
     image_sub = message_filters.Subscriber('output/image_raw/compressed', CompressedImage)
