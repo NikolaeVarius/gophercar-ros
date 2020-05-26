@@ -1,5 +1,6 @@
 # Writes image and steering data synchronized via timestamp
 # mostly since I'm too lazy to want to rewrite this in go at this very second
+# Also since I'm not a huge fan of the gocv bindings for image manipulation (is slow)
 
 import message_filters
 import rospy
@@ -29,17 +30,19 @@ def callback(image, joy):
         cv2.imwrite(image_filename, cv2_img)
 
 def main(args):
-    rospy.init_node('steer_data_sync', anonymous=True)
     image_sub = message_filters.Subscriber('output/image_raw/compressed', CompressedImage)
     joy_sub = message_filters.Subscriber('joy', Joy)
 
+    # http://wiki.ros.org/message_filters/ApproximateTime
     ts = message_filters.ApproximateTimeSynchronizer([image_sub, joy_sub], 10, 1)
     ts.registerCallback(callback)
-    print("Spinning")
+    
     try:
+        print("Spinning")
         rospy.spin()
     except KeyboardInterrupt:
         print("Shutting down")
 
 if __name__ == '__main__':
+    rospy.init_node('steerTraining', anonymous=True)
     main(sys.argv)
