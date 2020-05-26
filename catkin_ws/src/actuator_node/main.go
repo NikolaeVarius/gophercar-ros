@@ -158,20 +158,24 @@ func main() {
 	go func() {
 		for x := range actuatorMessages {
 			select {
+
 			case <-ticker.C:
+				angularValue := x.Data[0]
+				throttleValue := x.Data[3]
+
 				fmt.Printf("Recieved: %+v\n", x)
 				scErr := sc.Inc("drive_node_recieved", 42, 0.0)
 				if scErr != nil {
 					panic(scErr)
 				}
 
-				steeringPwm, steerErr := setSteering(x.Data[0])
+				steeringPwm, steerErr := setSteering(angularValue)
 				_ = sc.Gauge("steering_pwm", int64(steeringPwm), 0.0)
 				if steerErr != nil {
 					panic(steerErr)
 				}
 
-				throttlePwm, throttleErr := setThrottle(x.Data[3])
+				throttlePwm, throttleErr := setThrottle(throttleValue)
 				_ = sc.Gauge("throttle_pwm", int64(throttlePwm), 0.0)
 				if throttleErr != nil {
 					panic(throttleErr)
