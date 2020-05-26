@@ -50,22 +50,17 @@ var STATSD_URL = STATSD_HOST + ":" + STATSD_PORT
 
 func init() {
 	// statsd
-	var err error
 	config := &statsd.ClientConfig{
 		Address:       STATSD_URL,
 		Prefix:        NODE_NAME,
 		UseBuffered:   true,
 		FlushInterval: 300 * time.Millisecond,
 	}
-	sc, err = statsd.NewClientWithConfig(config)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-}
-
-func main() {
+	sc, _ = statsd.NewClientWithConfig(config)
 	defer sc.Close()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	_, err := host.Init()
 	if err != nil {
@@ -103,6 +98,19 @@ func main() {
 	if err := pca.SetPwm(STEERING_CHANNEL, 0, NEUTRAL_PULSE); err != nil {
 		log.Fatal(err)
 	}
+
+}
+
+func main() {
+	n, err := goroslib.NewNode(goroslib.NodeConf{
+		Name:       "/gophercar-actuator",
+		MasterHost: ROS_MASTER,
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Connected to Master: " + ROS_MASTER)
+	defer n.Close()
 
 	actuatorMessages := make(chan *std_msgs.Float64MultiArray, 100)
 
