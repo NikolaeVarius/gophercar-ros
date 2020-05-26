@@ -44,13 +44,18 @@ var sc statsd.Statter
 
 // Other
 const STATSD_HOST = "161.35.109.219"
+const STATSD_PORT = "8125"
+
+var STATSD_URL = STATSD_HOST + ":" + STATSD_PORT
+
+const NODE_NAME = "actuator"
 
 func init() {
 	// statsd
 	var err error
 	config := &statsd.ClientConfig{
-		Address:       "161.35.109.219:8125",
-		Prefix:        "drive-node",
+		Address:       STATSD_URL,
+		Prefix:        NODE_NAME,
 		UseBuffered:   true,
 		FlushInterval: 300 * time.Millisecond,
 	}
