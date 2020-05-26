@@ -21,6 +21,7 @@ image_path = "./data/images/"
 joy_path = "./data/joy/"
 
 def callback(image, joy):
+    print("handling event")
     img_timestamp = image.header.stamp.secs
     joy_timestamp = joy.header.stamp.secs
     
