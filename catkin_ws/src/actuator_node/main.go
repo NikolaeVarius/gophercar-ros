@@ -193,7 +193,7 @@ func convertStampedTwistedToAngle() {
 	return
 }
 
-// Translate from input to throttle control pwm values
+// Translate from /joy messages to throttle control pwm values
 func setThrottle(throttle msgs.Float64) (int, error) {
 	throttlePWMVal := getThrottlePWMVal(throttle)
 	fmt.Printf("Set Throttle PWM: %v\n", throttlePWMVal)
@@ -203,7 +203,7 @@ func setThrottle(throttle msgs.Float64) (int, error) {
 	return throttlePWMVal, nil
 }
 
-// Translate from intput to direction pwm values
+// Translate from /joy messages to direction pwm values
 func setSteering(steering msgs.Float64) (int, error) {
 	val := getSteeringPWMVal(steering)
 	fmt.Printf("Set Steering PWM: %v\n", val)
