@@ -280,6 +280,11 @@ func normalize(input, min, max float64) float64 {
 	}
 }
 
+// Handle Button Presses Sent via a Joy Message
+func handleJoyBtn(btnIndex msgs.Float64) {
+	return
+}
+
 // copy pasta to try it out some time in the future
 func Every(t time.Duration, f func()) *time.Ticker {
 	ticker := time.NewTicker(t)
