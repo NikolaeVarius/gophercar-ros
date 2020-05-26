@@ -34,6 +34,10 @@ const MAX_THROTTLE_PULSE = 400
 const THROTTLE_CHANNEL = 0
 const THROTTLE_STEP = 10
 
+// Emergency Stop
+// If this is ever set to true, car throttle should be set to 0
+var EMERGENCY_STOP = false
+
 // ROS Paramaters
 const ROS_MASTER = "donkeycar"
 const NODE_NAME = "/actuator"
@@ -156,29 +160,14 @@ func main() {
 	// Start doing stuff
 	ticker := time.NewTicker(100)
 	go func() {
-		for x := range actuatorMessages {
+		for msg := range actuatorMessages {
 			select {
-
 			case <-ticker.C:
-				angularValue := x.Data[0]
-				throttleValue := x.Data[3]
-
-				fmt.Printf("Recieved: %+v\n", x)
-				scErr := sc.Inc("drive_node_recieved", 42, 0.0)
-				if scErr != nil {
-					panic(scErr)
-				}
-
-				steeringPwm, steerErr := setSteering(angularValue)
-				_ = sc.Gauge("steering_pwm", int64(steeringPwm), 0.0)
-				if steerErr != nil {
-					panic(steerErr)
-				}
-
-				throttlePwm, throttleErr := setThrottle(throttleValue)
-				_ = sc.Gauge("throttle_pwm", int64(throttlePwm), 0.0)
-				if throttleErr != nil {
-					panic(throttleErr)
+				carErr := handleActuatorMessage(msg)
+				if carErr != nil {
+					// This doesn't do anything right now
+					EMERGENCY_STOP = true
+					fmt.Println("Problem while driving, initiating Emergency Stop: " + carErr.Error())
 				}
 			}
 		}
@@ -187,6 +176,32 @@ func main() {
 
 	infty := make(chan int)
 	<-infty
+}
+
+// Need to refator this to be less dumb
+func handleActuatorMessage(msg *std_msgs.Float64MultiArray) error {
+	angularValue := msg.Data[0]
+	throttleValue := msg.Data[3]
+
+	fmt.Printf("Recieved: %+v\n", msg)
+	scErr := sc.Inc("drive_node_recieved", 42, 0.0)
+	if scErr != nil {
+		return scErr
+	}
+
+	steeringPwm, steerErr := setSteering(angularValue)
+	_ = sc.Gauge("steering_pwm", int64(steeringPwm), 0.0)
+	if steerErr != nil {
+		return steerErr
+	}
+
+	throttlePwm, throttleErr := setThrottle(throttleValue)
+	_ = sc.Gauge("throttle_pwm", int64(throttlePwm), 0.0)
+	if throttleErr != nil {
+		return throttleErr
+	}
+
+	return nil
 }
 
 func joyButtonHandler(*std_msgs.Float64MultiArray) {
