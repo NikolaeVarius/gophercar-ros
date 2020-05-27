@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/aler9/goroslib"
-	"github.com/aler9/goroslib/msgs"
 	"github.com/aler9/goroslib/msgs/std_msgs"
 	"github.com/cactus/go-statsd-client/statsd"
 	"periph.io/x/periph/conn/gpio"
@@ -213,7 +212,7 @@ func convertStampedTwistedToAngle() {
 }
 
 // Translate from /joy messages to throttle control pwm values
-func setThrottle(throttle msgs.Float64) (int, error) {
+func setThrottle(throttle float64) (int, error) {
 	throttlePWMVal := getThrottlePWMVal(throttle)
 	fmt.Printf("Set Throttle PWM: %v\n", throttlePWMVal)
 	if err := pca.SetPwm(0, 0, gpio.Duty(throttlePWMVal)); err != nil {
@@ -223,7 +222,7 @@ func setThrottle(throttle msgs.Float64) (int, error) {
 }
 
 // Translate from /joy messages to direction pwm values
-func setSteering(steering msgs.Float64) (int, error) {
+func setSteering(steering float64) (int, error) {
 	val := getSteeringPWMVal(steering)
 	fmt.Printf("Set Steering PWM: %v\n", val)
 	if err := pca.SetPwm(1, 0, gpio.Duty(val)); err != nil {
@@ -233,7 +232,7 @@ func setSteering(steering msgs.Float64) (int, error) {
 }
 
 //  Turns a -1/1 Joy value into a scaled PWM value
-func getThrottlePWMVal(val msgs.Float64) int {
+func getThrottlePWMVal(val float64) int {
 	var pwmVal int
 	//var scaledPwmVal int
 
@@ -256,7 +255,7 @@ func getThrottlePWMVal(val msgs.Float64) int {
 
 }
 
-func getSteeringPWMVal(val msgs.Float64) int {
+func getSteeringPWMVal(val float64) int {
 	var pwmVal int
 	scaledPwmVal := normalize(float64(val), float64(MAX_RIGHT_PULSE), float64(MAX_LEFT_PULSE))
 	fmt.Printf("%f convfrted to %f\n", val, scaledPwmVal)
@@ -291,7 +290,7 @@ func normalize(input, min, max float64) float64 {
 }
 
 // Handle Button Presses Sent via a Joy Message
-func handleJoyBtn(btnIndex msgs.Float64) {
+func handleJoyBtn(btnIndex float64) {
 	return
 }
 
