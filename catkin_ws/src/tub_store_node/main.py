@@ -11,9 +11,8 @@ import cv2
 import json
 from rospy_message_converter import json_message_converter
 
-
+count = 0
 # from cv_bridge.boost.cv_bridge_boost import getCvType
-
 bridge = CvBridge()
 
 # Change this to somewhere not here at some point
@@ -21,12 +20,10 @@ image_path = "./data/images/"
 joy_path = "./data/joy/"
 
 def callback(image, joy):
-    print("handling event")
-    img_timestamp = image.header.stamp.secs
-    joy_timestamp = joy.header.stamp.secs
+    count = count + 1
     
-    print("img: " + str(img_timestamp))
-    print("joy: " + str(joy_timestamp))
+    if count % 10 == 0:
+        print("Handled Events: " + str(count))
 
     try:
         # handle image
@@ -50,8 +47,11 @@ def main(args):
     image_sub = message_filters.Subscriber('output/image_raw/compressed', CompressedImage)
     joy_sub = message_filters.Subscriber('joy', Joy)
 
-    # http://wiki.ros.org/message_filters/ApproximateTime
-    ts = message_filters.ApproximateTimeSynchronizer([image_sub, joy_sub], 10, 1)
+    # https://docs.ros.org/api/message_filters/html/python/#message_filters.ApproximateTimeSynchronizer
+    # Trying out between ApproximateTimeSynchronizer and TimeSynchronizer
+    # I don't think 1 second of approximity is good enough consiering we are generating roughly 30 fps
+    ts = message_filters.ApproximateTimeSynchronizer([image_sub, joy_sub], 100, 1)
+    # ts = message_filters.TimeSynchronizer([image_sub, joy_sub], 100)
     ts.registerCallback(callback)
     
     try:
