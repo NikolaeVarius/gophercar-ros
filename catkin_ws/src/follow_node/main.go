@@ -52,7 +52,9 @@ func main() {
 	go func() {
 		for img := range imgStream {
 			fmt.Println("moar")
-			showWindow(img)
+			fmt.Println(img)
+			// showWindow(img)
+
 		}
 	}()
 	infty := make(chan int)
@@ -86,7 +88,7 @@ func showWindow(img *sensor_msgs.CompressedImage) {
 		imgBytes[i] = uint8(imgData[i])
 	}
 
-	imgMat, err := gocv.NewMatFromBytes(640, 360, gocv.MatTypeCV8UC3, imgBytes)
+	imgMat, err := gocv.NewMatFromBytes(480, 640, gocv.MatTypeCV8UC3, imgBytes)
 	fmt.Println(imgBytes)
 	if err != nil {
 		fmt.Println(err)
