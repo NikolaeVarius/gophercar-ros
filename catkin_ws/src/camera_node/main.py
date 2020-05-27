@@ -163,12 +163,9 @@ def main():
 
         if ENABLE_DISPLAY is True and ENABLE_FPS is True:
             currentTime = time.time()
-            fps = getCurrentFPS(currentTime, previousTime)
+            frame = overlayFPS(frame, currentTime, previousTime, frames)
             previousTime = currentTime
-            fps_display_string = "FPS : %0.1f" % fps
-            cv2.putText(frame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
-            cv2.putText(frame, "Frame: " + str(frames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
-        
+
         # Update Frame
         show.frame = frame
 
@@ -190,12 +187,17 @@ def main():
             break
     cv2.destroyAllWindows()
 
-
     try:
         rospy.spin()
     except KeyboardInterrupt:
         print( "Shutting down ROS Camera Publisher")
 
+def overlayFPS(frame, currentTime, previousTime, currentFrames):
+    fps = getCurrentFPS(currentTime, previousTime)
+    fps_display_string = "FPS : %0.1f" % fps
+    cv2.putText(frame, fps_display_string, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+    cv2.putText(frame, "Frame: " + str(currentFrames), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+    return frame
 
 if __name__ == "__main__":
     print("ROS_MASTER_URI: " + os.environ['ROS_MASTER_URI'])
