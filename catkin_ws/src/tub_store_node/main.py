@@ -25,6 +25,9 @@ def callback(image, joy):
     img_timestamp = image.header.stamp.secs
     joy_timestamp = joy.header.stamp.secs
     
+    print("img: " + str(img_timestamp))
+    print("joy: " + str(joy_timestamp))
+
     try:
         # handle image
         cv2_img = bridge.compressed_imgmsg_to_cv2(image, "bgr8")
@@ -36,10 +39,10 @@ def callback(image, joy):
         json_filename = joy_path + str(img_timestamp) + ".json" 
         with open(json_filename, 'w') as json_file:
             json.dump(json_str, json_file)
-    except CvBridgeError as e:
+    except CvBridgeError:
+        print(CvBridgeError)
+    except Exception as e:
         print(e)
-    except:
-        sys.exit(1)
 
 
 
