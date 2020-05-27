@@ -21,7 +21,7 @@ from scipy.ndimage import filters
 from sensor_msgs.msg import CompressedImage
 # Logging
 VERBOSE=True
-LOG_AFTER_FRAMES=0 # Number of frames per log emitted reporting number of frames processed. Setting this to 0 should disable it
+LOG_AFTER_FRAMES=100 # Number of frames per log emitted reporting number of frames processed. Setting this to 0 should disable it
 
 # Toggle if a window showing camera output should pop up
 ENABLE_DISPLAY=False
