@@ -183,7 +183,10 @@ def main():
         # https://stackoverflow.com/questions/35372700/whats-0xff-for-in-cv2-waitkey1/39203128#39203128
         keyCode = cv2.waitKey(30) & 0xFF
         # Kills on Escape
-        if keyCode == 27:
+        if rospy.is_shutdown() or keyCode == 27:
+            print('shutdown')
+            stream.stop()
+            show.stop()
             break
     cv2.destroyAllWindows()
 
