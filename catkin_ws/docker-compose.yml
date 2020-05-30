@@ -1,0 +1,18 @@
+version: '2'
+
+networks:
+  ros:
+    driver: bridge
+version: '2'
+
+networks:
+  ros:
+    driver: bridge
+
+services:
+  ros-master:
+    image: ros:melodic-ros-core
+    #command: stdbuf -o L roscore
+    networks:
+      - ros
+    restart: always
