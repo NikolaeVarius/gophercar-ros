@@ -177,6 +177,21 @@ func main() {
 	<-infty
 }
 
+// Handle Raw Joy (Direct from /joy topic)
+func handleJoyMessage() {
+	return
+}
+
+// Handle Joy Twist (Linear/Angular)
+func handleJoyTwistMessage() {
+	return
+}
+
+// Keyboard control
+func handleKeyboardMessage() {
+	return
+}
+
 // Need to refator this to be less dumb
 func handleActuatorMessage(msg *std_msgs.Float64MultiArray) error {
 	angularValue := msg.Data[0]
