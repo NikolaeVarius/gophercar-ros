@@ -16,40 +16,40 @@ import (
 )
 
 // Steering Angle Parameters
-const MAX_LEFT_ANGLE = 0
-const MAX_RIGHT_ANGLE = 0
-const MAX_LEFT_PULSE = 400
-const MAX_RIGHT_PULSE = 200
-const NEUTRAL_PULSE = 300
-const STEERING_CHANNEL = 1
+const maxLeftAngle = 0
+const maxRightAngle = 0
+const maxLeftPulse = 400
+const maxRightPulse = 200
+const neutralPulse = 300
+const steeringChannel = 1
 
 // Throttle Paramters
-const STOP_PULSE = 0
-const MIN_THROTTLE = 0 // maybe should just use STOP_PULSE?
-const MAX_THROTTLE = 0
-const CALIBRATION_THROTTLE_PULSE = 330
-const MIN_THROTTLE_PULSE = 0
-const MAX_THROTTLE_PULSE = 400
-const THROTTLE_CHANNEL = 0
-const THROTTLE_STEP = 10
+const stopPulse = 0
+const minThrottle = 0 // maybe should just use STOP_PULSE?
+const maxThrottle = 0
+const calibrationThrottlePulse = 330
+const minThrottlePulse = 0
+const maxThrottlePulse = 400
+const throttleChannel = 0
+const throttleStep = 10
 
 // Emergency Stop
 // If this is ever set to true, car throttle should be set to 0
-var EMERGENCY_STOP = false
+var emergencyStop = false
 
 // ROS Paramaters
-const ROS_MASTER = "donkeycar"
-const NODE_NAME = "/actuator"
-const ACTUATOR_TOPIC = "/actuator"
+const rosMasterNode = "donkeycar"
+const rosNodeName = "/actuator"
+const rosActuatorTopic = "/actuator"
 
 var pca *pca9685.Dev
 var sc statsd.Statter
 
 // Other
-const STATSD_HOST = "161.35.109.219"
-const STATSD_PORT = "8125"
+const statsdHost = "161.35.109.219"
+const statsdPort = "8125"
 
-var STATSD_URL = STATSD_HOST + ":" + STATSD_PORT
+var statsdURL = STATSD_HOST + ":" + STATSD_PORT
 
 func init() {
 	// statsd
@@ -131,7 +131,7 @@ func main() {
 	fmt.Println("Subscribed to: " + ACTUATOR_TOPIC)
 	defer subTopic.Close()
 
-	// publisher topic to publish current ESC values to a topic
+	// publisher topic to publish current ESC values to a topic for reporting purposes
 	escThrottleTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
 		Node:  n,
 		Topic: "/pwm-throttle",
@@ -165,7 +165,8 @@ func main() {
 				carErr := handleActuatorMessage(msg)
 				if carErr != nil {
 					// This doesn't do anything right now
-					EMERGENCY_STOP = true
+					// This is a global variable that is checked every actuator cycle
+					emergencyStop = true
 					fmt.Println("Problem while driving, initiating Emergency Stop: " + carErr.Error())
 				}
 			}
@@ -175,11 +176,6 @@ func main() {
 
 	infty := make(chan int)
 	<-infty
-}
-
-// Handle Raw Joy (Direct from /joy topic)
-func handleJoyMessage() {
-	return
 }
 
 // Handle Joy Twist (Linear/Angular)
