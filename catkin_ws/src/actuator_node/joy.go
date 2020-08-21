@@ -8,16 +8,12 @@ import (
 	"github.com/aler9/goroslib/msgs/std_msgs"
 
 	//	"github.com/aler9/goroslib/msgs/geometry_msgs"
-	"log"
-	"time"
 
 	"github.com/aler9/goroslib/msgs/sensor_msgs"
-	"github.com/cactus/go-statsd-client/statsd"
 )
 
 var subTopic *goroslib.Subscriber
 var pubTopic *goroslib.Publisher
-var sc statsd.Statter
 
 func covertJoyToStdMessage(msg *sensor_msgs.Joy) std_msgs.Float64MultiArray {
 	var newMsg std_msgs.Float64MultiArray
@@ -71,26 +67,12 @@ func covertJoyToStdMessage(msg *sensor_msgs.Joy) std_msgs.Float64MultiArray {
 	return newMsg
 }
 
-const STATSD_HOST = "161.35.109.219"
-
-func init() {
-	// statsd
-	var err error
-	config := &statsd.ClientConfig{
-		Address:       "161.35.109.219:8125",
-		Prefix:        "joy-node",
-		UseBuffered:   true,
-		FlushInterval: 300 * time.Millisecond,
-	}
-	sc, err = statsd.NewClientWithConfig(config)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
+const statsdHost = "161.35.109.219"
 
 func main() {
 	joyMessages := make(chan *sensor_msgs.Joy, 100)
-	defer sc.Close()
+	// defer sc.Close()
+
 	n, err := goroslib.NewNode(goroslib.NodeConf{
 		Name:       "/goroslib",
 		MasterHost: "donkeycar",
@@ -129,7 +111,7 @@ func main() {
 
 	go func() {
 		for x := range joyMessages {
-			sc.Inc("joy.publish.counter", 1, 1.0)
+			// sc.Inc("joy.publish.counter", 1, 1.0)
 			msg := covertJoyToStdMessage(x)
 			fmt.Println("Outgoing: %+v\n", msg)
 			publishMessage(msg)
