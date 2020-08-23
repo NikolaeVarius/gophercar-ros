@@ -67,8 +67,6 @@ func covertJoyToStdMessage(msg *sensor_msgs.Joy) std_msgs.Float64MultiArray {
 	return newMsg
 }
 
-const statsdHost = "161.35.109.219"
-
 func main() {
 	joyMessages := make(chan *sensor_msgs.Joy, 100)
 	// defer sc.Close()

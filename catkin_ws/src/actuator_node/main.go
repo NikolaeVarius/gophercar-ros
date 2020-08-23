@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/aler9/goroslib"
+	"github.com/aler9/goroslib/msgs"
+	"github.com/aler9/goroslib/msgs/sensor_msgs"
 	"github.com/aler9/goroslib/msgs/std_msgs"
 	"github.com/cactus/go-statsd-client/statsd"
 	"periph.io/x/periph/conn/gpio"
@@ -40,7 +42,11 @@ var emergencyStop = false
 // ROS Paramaters
 const rosMasterNode = "donkeycar"
 const rosNodeName = "/actuator"
-const rosActuatorTopic = "/actuator"
+
+// const rosActuatorTopic = "/joy"
+// const rosSteeringTopic = "/pwm-steering"
+// const rosThrottleTopic = "/pwm-throttle"
+const rosActuatorTopic = "/joy"
 const rosSteeringTopic = "/pwm-steering"
 const rosThrottleTopic = "/pwm-throttle"
 
@@ -107,6 +113,8 @@ func init() {
 }
 
 func main() {
+
+	// Register self as a node
 	n, err := goroslib.NewNode(goroslib.NodeConf{
 		Name:       "/gophercar-actuator",
 		MasterHost: rosMasterNode,
@@ -114,15 +122,19 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Connected to Master: " + rosMasterNode)
+	fmt.Println("Connected to ROS Master: " + rosMasterNode)
 	defer n.Close()
 
-	actuatorMessages := make(chan *std_msgs.Float64MultiArray, 100)
+	actuatorMessages := make(chan *sensor_msgs.Joy, 100)
+	// actuatorMessages := make(chan *std_msgs.Float64MultiArray, 100)
 
 	// Subscribe to actuator topic to process joy/keypresses
 	subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{Node: n,
 		Topic: rosActuatorTopic,
-		Callback: func(msg *std_msgs.Float64MultiArray) {
+		// Callback: func(msg *std_msgs.Float64MultiArray) {
+		// 	actuatorMessages <- msg
+		// },
+		Callback: func(msg *sensor_msgs.Joy) {
 			actuatorMessages <- msg
 		},
 	})
@@ -134,29 +146,30 @@ func main() {
 	defer subTopic.Close()
 
 	// publisher topic to publish current ESC values to a topic for reporting purposes
-	escThrottleTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
-		Node:  n,
-		Topic: rosSteeringTopic,
-		Msg:   &std_msgs.Int64{},
-		Latch: false,
-	})
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Connected to PWM-Throttle Publisher Topic")
-	defer escThrottleTopic.Close()
+	//
+	// escThrottleTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
+	// 	Node:  n,
+	// 	Topic: rosSteeringTopic,
+	// 	Msg:   &std_msgs.Int64{},
+	// 	Latch: false,
+	// })
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println("Connected to PWM-Throttle Publisher Topic")
+	// defer escThrottleTopic.Close()
 
-	escSteeringTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
-		Node:  n,
-		Topic: rosThrottleTopic,
-		Msg:   &std_msgs.Int64{},
-		Latch: false,
-	})
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Connected to PWM-Steering Publisher Topic")
-	defer escSteeringTopic.Close()
+	// escSteeringTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
+	// 	Node:  n,
+	// 	Topic: rosThrottleTopic,
+	// 	Msg:   &std_msgs.Int64{},
+	// 	Latch: false,
+	// })
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println("Connected to PWM-Steering Publisher Topic")
+	// defer escSteeringTopic.Close()
 
 	// Start doing stuff
 	ticker := time.NewTicker(100)
@@ -192,9 +205,15 @@ func handleKeyboardMessage() {
 }
 
 // Need to refator this to be less dumb
-func handleActuatorMessage(msg *std_msgs.Float64MultiArray) error {
-	angularValue := msg.Data[0]
-	throttleValue := msg.Data[3]
+// func handleActuatorMessage(msg *std_msgs.Float64MultiArray) error {
+func handleActuatorMessage(msg *sensor_msgs.Joy) error {
+
+	stdMsg := covertJoyToStdMessage(msg)
+
+	// angularValue := msg.Data[0]
+	// throttleValue := msg.Data[3]
+	angularValue := stdMsg.Data[0]
+	throttleValue := stdMsg.Data[3]
 
 	fmt.Printf("Recieved: %+v\n", msg)
 	scErr := sc.Inc("drive_node_recieved", 42, 0.0)
@@ -306,6 +325,58 @@ func normalize(input, min, max float64) float64 {
 // Handle Button Presses Sent via a Joy Message
 func handleJoyBtn(btnIndex float64) {
 	return
+}
+
+func covertJoyToStdMessage(msg *sensor_msgs.Joy) std_msgs.Float64MultiArray {
+	var newMsg std_msgs.Float64MultiArray
+	// 4 probably isn't the right size
+	data := make([]msgs.Float64, 14)
+	// Joy sticks
+	fmt.Println("Incoming: %#v\n", msg)
+	leftJoyX := msgs.Float64(float64(msg.Axes[0]))
+	leftJoyY := msgs.Float64(float64(msg.Axes[1]))
+	rightJoyX := msgs.Float64(float64(msg.Axes[2]))
+	rightJoyY := msgs.Float64(float64(msg.Buttons[5]))
+	leftJoyBtn := msgs.Float64(float64(msg.Axes[10]))
+	rightJoyBtn := msgs.Float64(float64(msg.Axes[11]))
+
+	// Face buttons - Ps4 Controller based
+	squareBtn := msgs.Float64(float64(msg.Axes[0]))
+	crossBtn := msgs.Float64(float64(msg.Axes[1]))
+	circleBtn := msgs.Float64(float64(msg.Axes[2]))
+	triangleBtn := msgs.Float64(float64(msg.Axes[3]))
+	leftBumperBtn := msgs.Float64(float64(msg.Axes[4]))
+	leftTriggerBtn := msgs.Float64(float64(msg.Axes[5]))
+	rightBumperBtn := msgs.Float64(float64(msg.Axes[6]))
+	rightTriggerBtn := msgs.Float64(float64(msg.Axes[7]))
+	optionsBtn := msgs.Float64(float64(msg.Axes[8]))
+	startBtn := msgs.Float64(float64(msg.Axes[9]))
+	centerBtn := msgs.Float64(float64(msg.Axes[12]))    // PS Logo
+	centerBtnAlt := msgs.Float64(float64(msg.Axes[13])) // Trackpad
+
+	//	cross_btn := ""
+	//	circle_btn := ""
+	//	tirangle_btn := ""
+
+	//==================================
+	data[0] = leftJoyX
+	data[1] = leftJoyY
+	data[2] = rightJoyX
+	data[3] = rightJoyY
+	data[4] = squareBtn
+	data[5] = rightJoyY
+	// data[6] =
+	// data[7] =
+	// data[8] =
+	// data[9] =
+	// data[10] =
+	// data[11] =
+	// data[12] =
+	// data[13] =
+
+	newMsg.Data = data
+
+	return newMsg
 }
 
 // copy pasta to try it out some time in the future

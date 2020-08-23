@@ -4,6 +4,8 @@ github.com/aler9/goroslib v0.0.0-20200524142612-fe4c6861c0f3 h1:buba2XZ3G8W3+aw6
 github.com/aler9/goroslib v0.0.0-20200524142612-fe4c6861c0f3/go.mod h1:RaP72WrJOKwerZBIVjWJ9EtSL/mSzF2/4lKd5/JEknY=
 github.com/aler9/goroslib v0.0.0-20200526223431-396a81f7091f h1:lXmXK75rbF72kD3dQUS7gJ9ZzJRBTqZVo5FXkoDL5ZM=
 github.com/aler9/goroslib v0.0.0-20200526223431-396a81f7091f/go.mod h1:RaP72WrJOKwerZBIVjWJ9EtSL/mSzF2/4lKd5/JEknY=
+github.com/aler9/goroslib v0.0.0-20200815112328-45882b8b466a h1:fPupDmB4aekjZH3z/gYFbsqCu4H2aK18Il4DQGXbMm0=
+github.com/aler9/goroslib v0.0.0-20200815112328-45882b8b466a/go.mod h1:pFLCnt8HT39OyexR2Ze2iZ1kwEY/8lhE3pCxGmzhSdk=
 github.com/boljen/go-bitmap v0.0.0-20151001105940-23cd2fb0ce7d h1:zsO4lp+bjv5XvPTF58Vq+qgmZEYZttJK+CWtSZhKenI=
 github.com/boljen/go-bitmap v0.0.0-20151001105940-23cd2fb0ce7d/go.mod h1:f1iKL6ZhUWvbk7PdWVmOaak10o86cqMUYEmn1CZNGEI=
 github.com/cactus/go-statsd-client v1.0.1 h1:R58kYEe8CS4Dg7zNgGi8J0nFhYIGaBvIC7SHJ1l08is=
