@@ -49,13 +49,13 @@ var sc statsd.Statter
 const statsdHost = "161.35.109.219"
 const statsdPort = "8125"
 
-var statsdURL = STATSD_HOST + ":" + STATSD_PORT
+var statsdURL = statsdHost + ":" + statsdPort
 
 func init() {
 	// statsd
 	config := &statsd.ClientConfig{
-		Address:       STATSD_URL,
-		Prefix:        NODE_NAME,
+		Address:       statsdURL,
+		Prefix:        rosNodeName,
 		UseBuffered:   true,
 		FlushInterval: 300 * time.Millisecond,
 	}
@@ -91,14 +91,14 @@ func init() {
 	// When first started, the ESC needs to be calibrated with this pulse
 	// This should cause a blinking red light on the ESC to stop blinking, and a single beep to occur
 	fmt.Println("Initializing ESC")
-	if err := pca.SetPwm(0, 0, CALIBRATION_THROTTLE_PULSE); err != nil {
+	if err := pca.SetPwm(0, 0, calibrationThrottlePulse); err != nil {
 		log.Fatal(err)
 	}
 
 	// Channel 1 = Steering
 	// Initialize PWM Steering at a Neutral Value
 	fmt.Println("Initializing Steering")
-	if err := pca.SetPwm(STEERING_CHANNEL, 0, NEUTRAL_PULSE); err != nil {
+	if err := pca.SetPwm(steeringChannel, 0, neutralPulse); err != nil {
 		log.Fatal(err)
 	}
 
@@ -107,19 +107,19 @@ func init() {
 func main() {
 	n, err := goroslib.NewNode(goroslib.NodeConf{
 		Name:       "/gophercar-actuator",
-		MasterHost: ROS_MASTER,
+		MasterHost: rosMasterNode,
 	})
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Connected to Master: " + ROS_MASTER)
+	fmt.Println("Connected to Master: " + rosMasterNode)
 	defer n.Close()
 
 	actuatorMessages := make(chan *std_msgs.Float64MultiArray, 100)
 
 	// Subscribe to actuator topic to process joy/keypresses
 	subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{Node: n,
-		Topic: ACTUATOR_TOPIC,
+		Topic: rosActuatorTopic,
 		Callback: func(msg *std_msgs.Float64MultiArray) {
 			actuatorMessages <- msg
 		},
@@ -128,7 +128,7 @@ func main() {
 		fmt.Println("Most likely the topic this subscriber wants to attach to does not exist")
 		panic(err)
 	}
-	fmt.Println("Subscribed to: " + ACTUATOR_TOPIC)
+	fmt.Println("Subscribed to: " + rosActuatorTopic)
 	defer subTopic.Close()
 
 	// publisher topic to publish current ESC values to a topic for reporting purposes
@@ -247,11 +247,11 @@ func getThrottlePWMVal(val float64) int {
 	var pwmVal int
 	//var scaledPwmVal int
 
-	scaledPwmVal := normalize(float64(val), float64(MIN_THROTTLE_PULSE), float64(MAX_THROTTLE_PULSE))
+	scaledPwmVal := normalize(float64(val), float64(minThrottlePulse), float64(maxThrottlePulse))
 	fmt.Printf("%f converted to %f\n", val, scaledPwmVal)
 	// TODO; Fix this up so that going backward is a thing. Not 100% what that would look like
 	if val < 0 {
-		pwmVal = MIN_THROTTLE_PULSE
+		pwmVal = minThrottlePulse
 	}
 
 	if val > 0 {
@@ -259,7 +259,7 @@ func getThrottlePWMVal(val float64) int {
 	}
 
 	if val == 0 {
-		pwmVal = STOP_PULSE
+		pwmVal = stopPulse
 	}
 
 	return pwmVal
@@ -268,7 +268,7 @@ func getThrottlePWMVal(val float64) int {
 
 func getSteeringPWMVal(val float64) int {
 	var pwmVal int
-	scaledPwmVal := normalize(float64(val), float64(MAX_RIGHT_PULSE), float64(MAX_LEFT_PULSE))
+	scaledPwmVal := normalize(float64(val), float64(maxRightPulse), float64(maxLeftPulse))
 	fmt.Printf("%f convfrted to %f\n", val, scaledPwmVal)
 	if val < 0 {
 		//	fmt.Println("go right")
@@ -282,7 +282,7 @@ func getSteeringPWMVal(val float64) int {
 
 	if val == 0 {
 		//	fmt.Println("stay straight")
-		pwmVal = NEUTRAL_PULSE
+		pwmVal = neutralPulse
 	}
 
 	return pwmVal
