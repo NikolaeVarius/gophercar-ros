@@ -24,10 +24,10 @@ VERBOSE=True
 LOG_AFTER_FRAMES=100 # Number of frames per log emitted reporting number of frames processed. Setting this to 0 should disable it
 
 # Toggle if a window showing camera output should pop up
-ENABLE_DISPLAY=False
+ENABLE_DISPLAY=True
 
 # Image Frame Settings
-GRAYSCALE=False # Convert to greyscale
+GRAYSCALE=True # Convert to greyscale
 SCALING_PERCENT=50 # How much to scale image size
 ENABLE_FPS=True
 
@@ -178,7 +178,7 @@ def main():
 
         frames = frames + 1
         if LOG_AFTER_FRAMES != 0 and frames % LOG_AFTER_FRAMES == 0:
-            print("Processed " + str(LOG_AFTER_FRAMES) + " frames for a total of" + str(frames))
+            print("Processed " + str(LOG_AFTER_FRAMES) + " frames for a total of " + str(frames))
 
         # https://stackoverflow.com/questions/35372700/whats-0xff-for-in-cv2-waitkey1/39203128#39203128
         keyCode = cv2.waitKey(30) & 0xFF
