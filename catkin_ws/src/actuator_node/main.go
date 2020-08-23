@@ -41,6 +41,8 @@ var emergencyStop = false
 const rosMasterNode = "donkeycar"
 const rosNodeName = "/actuator"
 const rosActuatorTopic = "/actuator"
+const rosSteeringTopic = "/pwm-steering"
+const rosThrottleTopic = "/pwm-throttle"
 
 var pca *pca9685.Dev
 var sc statsd.Statter
@@ -134,7 +136,7 @@ func main() {
 	// publisher topic to publish current ESC values to a topic for reporting purposes
 	escThrottleTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
 		Node:  n,
-		Topic: "/pwm-throttle",
+		Topic: rosSteeringTopic,
 		Msg:   &std_msgs.Int64{},
 		Latch: false,
 	})
@@ -146,7 +148,7 @@ func main() {
 
 	escSteeringTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
 		Node:  n,
-		Topic: "/pwm-steering",
+		Topic: rosThrottleTopic,
 		Msg:   &std_msgs.Int64{},
 		Latch: false,
 	})
@@ -158,6 +160,7 @@ func main() {
 
 	// Start doing stuff
 	ticker := time.NewTicker(100)
+	fmt.Println("Main Loop Started")
 	go func() {
 		for msg := range actuatorMessages {
 			select {
