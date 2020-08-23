@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/aler9/goroslib"
-	"github.com/aler9/goroslib/msgs"
 	"github.com/aler9/goroslib/msgs/sensor_msgs"
 	"github.com/aler9/goroslib/msgs/std_msgs"
 	"github.com/cactus/go-statsd-client/statsd"
@@ -215,7 +214,7 @@ func handleActuatorMessage(msg *sensor_msgs.Joy) error {
 	angularValue := stdMsg.Data[0]
 	throttleValue := stdMsg.Data[3]
 
-	fmt.Printf("Recieved: %+v\n", msg)
+	// fmt.Printf("Recieved: %+v\n", msg)
 	scErr := sc.Inc("drive_node_recieved", 42, 0.0)
 	if scErr != nil {
 		return scErr
@@ -269,8 +268,12 @@ func getThrottlePWMVal(val float64) int {
 	var pwmVal int
 	//var scaledPwmVal int
 
+	if val == 0 {
+		return 0
+	}
+
 	scaledPwmVal := normalize(float64(val), float64(minThrottlePulse), float64(maxThrottlePulse))
-	fmt.Printf("%f converted to %f\n", val, scaledPwmVal)
+	fmt.Printf("Throttle PWM value `%f scaled to %f\n", val, scaledPwmVal)
 	// TODO; Fix this up so that going backward is a thing. Not 100% what that would look like
 	if val < 0 {
 		pwmVal = minThrottlePulse
@@ -291,7 +294,7 @@ func getThrottlePWMVal(val float64) int {
 func getSteeringPWMVal(val float64) int {
 	var pwmVal int
 	scaledPwmVal := normalize(float64(val), float64(maxRightPulse), float64(maxLeftPulse))
-	fmt.Printf("%f convfrted to %f\n", val, scaledPwmVal)
+	fmt.Printf("Steering PWM value %f scaled to %f\n", val, scaledPwmVal)
 	if val < 0 {
 		//	fmt.Println("go right")
 		pwmVal = int(scaledPwmVal)
@@ -330,49 +333,121 @@ func handleJoyBtn(btnIndex float64) {
 func covertJoyToStdMessage(msg *sensor_msgs.Joy) std_msgs.Float64MultiArray {
 	var newMsg std_msgs.Float64MultiArray
 	// 4 probably isn't the right size
-	data := make([]msgs.Float64, 14)
-	// Joy sticks
-	fmt.Println("Incoming: %#v\n", msg)
-	leftJoyX := msgs.Float64(float64(msg.Axes[0]))
-	leftJoyY := msgs.Float64(float64(msg.Axes[1]))
-	rightJoyX := msgs.Float64(float64(msg.Axes[2]))
-	rightJoyY := msgs.Float64(float64(msg.Buttons[5]))
-	leftJoyBtn := msgs.Float64(float64(msg.Axes[10]))
-	rightJoyBtn := msgs.Float64(float64(msg.Axes[11]))
+	data := make([]float64, 14)
+
+	// fmt.Println("Incoming: %#v\n", msg)
+
+	// Joysticks
+	leftJoyX := float64(msg.Axes[0])
+	leftJoyY := float64(msg.Axes[1])
+	rightJoyX := float64(msg.Axes[2])
+	rightJoyY := float64(msg.Axes[5])
+
+	// Direction Buttons
+	xDirBtn := float64(msg.Axes[6])
+	if xDirBtn == 1 {
+		fmt.Println("Left Pressed")
+	}
+
+	if xDirBtn == -1 {
+		fmt.Println("Right Pressed")
+	}
+
+	yDirBtn := float64(msg.Axes[7])
+	if yDirBtn == 1 {
+		fmt.Println("Up Pressed")
+	}
+
+	if yDirBtn == -1 {
+		fmt.Println("Down Pressed")
+	}
+
+	// Other Buttons
+	leftJoyBtn := float64(msg.Buttons[10])
+	if leftJoyBtn == 1 {
+		fmt.Println("Left Joy Pressed")
+	}
+
+	rightJoyBtn := float64(msg.Buttons[11])
+	if rightJoyBtn == 1 {
+		fmt.Println("Right Joy Pressed")
+	}
 
 	// Face buttons - Ps4 Controller based
-	squareBtn := msgs.Float64(float64(msg.Axes[0]))
-	crossBtn := msgs.Float64(float64(msg.Axes[1]))
-	circleBtn := msgs.Float64(float64(msg.Axes[2]))
-	triangleBtn := msgs.Float64(float64(msg.Axes[3]))
-	leftBumperBtn := msgs.Float64(float64(msg.Axes[4]))
-	leftTriggerBtn := msgs.Float64(float64(msg.Axes[5]))
-	rightBumperBtn := msgs.Float64(float64(msg.Axes[6]))
-	rightTriggerBtn := msgs.Float64(float64(msg.Axes[7]))
-	optionsBtn := msgs.Float64(float64(msg.Axes[8]))
-	startBtn := msgs.Float64(float64(msg.Axes[9]))
-	centerBtn := msgs.Float64(float64(msg.Axes[12]))    // PS Logo
-	centerBtnAlt := msgs.Float64(float64(msg.Axes[13])) // Trackpad
+	squareBtn := float64(msg.Buttons[0])
+	if squareBtn == 1 {
+		fmt.Println("Square Pressed")
+	}
 
-	//	cross_btn := ""
-	//	circle_btn := ""
-	//	tirangle_btn := ""
+	crossBtn := float64(msg.Buttons[1])
+	if crossBtn == 1 {
+		fmt.Println("Cross Pressed")
+	}
+
+	circleBtn := float64(msg.Buttons[2])
+	if circleBtn == 1 {
+		fmt.Println("Circle Pressed")
+	}
+
+	triangleBtn := float64(msg.Buttons[3])
+	if triangleBtn == 1 {
+		fmt.Println("Triangle Pressed")
+	}
+
+	leftBumperBtn := float64(msg.Buttons[4])
+	if leftBumperBtn == 1 {
+		fmt.Println("Left Bumper Pressed")
+	}
+
+	rightBumperBtn := float64(msg.Buttons[5])
+	if rightBumperBtn == 1 {
+		fmt.Println("Right Bumper Pressed")
+	}
+
+	leftTriggerBtn := float64(msg.Buttons[6])
+	if leftTriggerBtn == 1 {
+		fmt.Println("Left Trigger Pressed")
+	}
+
+	rightTriggerBtn := float64(msg.Buttons[7])
+	if rightTriggerBtn == 1 {
+		fmt.Println("Right Trigger Pressed")
+	}
+
+	optionsBtn := float64(msg.Buttons[8])
+	if optionsBtn == 1 {
+		fmt.Println("Option Pressed")
+	}
+
+	startBtn := float64(msg.Buttons[9])
+	if startBtn == 1 {
+		fmt.Println("Start Pressed")
+	}
+
+	centerBtn := float64(msg.Buttons[12]) // PS Logo
+	if centerBtn == 1 {
+		fmt.Println("Center Pressed")
+	}
+
+	centerBtnAlt := float64(msg.Buttons[13]) // Trackpad
+	if centerBtnAlt == 1 {
+		fmt.Println("Center Alt. Pressed")
+	}
 
 	//==================================
 	data[0] = leftJoyX
 	data[1] = leftJoyY
 	data[2] = rightJoyX
 	data[3] = rightJoyY
+
 	data[4] = squareBtn
 	data[5] = rightJoyY
-	// data[6] =
-	// data[7] =
-	// data[8] =
-	// data[9] =
-	// data[10] =
-	// data[11] =
-	// data[12] =
-	// data[13] =
+	data[6] = leftJoyBtn
+	data[7] = rightJoyBtn
+	data[8] = crossBtn
+	data[9] = circleBtn
+	data[10] = triangleBtn
+	data[11] = leftBumperBtn
 
 	newMsg.Data = data
 
