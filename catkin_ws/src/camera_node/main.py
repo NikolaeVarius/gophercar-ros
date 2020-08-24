@@ -24,10 +24,10 @@ VERBOSE=True
 LOG_AFTER_FRAMES=100 # Number of frames per log emitted reporting number of frames processed. Setting this to 0 should disable it
 
 # Toggle if a window showing camera output should pop up
-ENABLE_DISPLAY=True
+ENABLE_DISPLAY=False
 
 # Image Frame Settings
-GRAYSCALE=True # Convert to greyscale
+GRAYSCALE=False # Convert to greyscale
 SCALING_PERCENT=50 # How much to scale image size
 ENABLE_FPS=True
 
