@@ -28,7 +28,9 @@ const steeringChannel = 1
 const stopPulse = 0
 const minThrottle = 0 // maybe should just use STOP_PULSE?
 const maxThrottle = 0
-const calibrationThrottlePulse = 330
+
+// Initial Value to calibrate ESC Throttle
+const calibrationThrottlePulse = 360
 const minThrottlePulse = 0
 const maxThrottlePulse = 400
 const throttleChannel = 0
@@ -97,10 +99,11 @@ func init() {
 	// Initialize PWM throttle.
 	// When first started, the ESC needs to be calibrated with this pulse
 	// This should cause a blinking red light on the ESC to stop blinking, and a single beep to occur
-	fmt.Println("Initializing ESC")
-	if err := pca.SetPwm(0, 0, calibrationThrottlePulse); err != nil {
+	fmt.Println("Initializing Throttle")
+	if err := pca.SetPwm(throttleChannel, 0, calibrationThrottlePulse); err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("Red Light on ESC should not be blinking, and a single beep should have been output")
 
 	// Channel 1 = Steering
 	// Initialize PWM Steering at a Neutral Value
