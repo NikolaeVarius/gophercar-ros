@@ -255,12 +255,12 @@ func setThrottle(throttle float64) (int, error) {
 
 // Translate from /joy messages to direction pwm values
 func setSteering(steering float64) (int, error) {
-	val := getSteeringPWMVal(steering)
-	fmt.Printf("Set Steering PWM: %v\n", val)
-	if err := pca.SetPwm(1, 0, gpio.Duty(val)); err != nil {
+	steeringPWMVal := getSteeringPWMVal(steering)
+	fmt.Printf("Set Steering PWM: %v\n", steeringPWMVal)
+	if err := pca.SetPwm(1, 0, gpio.Duty(steeringPWMVal)); err != nil {
 		return 0, err
 	}
-	return val, nil
+	return steeringPWMVal, nil
 }
 
 //  Turns a -1/1 Joy value into a scaled PWM value
