@@ -32,7 +32,10 @@ const maxThrottle = 0
 // Initial Value to calibrate ESC Throttle
 const calibrationThrottlePulse = 350
 const minThrottlePulse = 0
-const maxThrottlePulse = 490
+
+// Makes car go backward
+// const maxThrottlePulse = 490
+const maxThrottlePulse = 340
 const throttleChannel = 0
 const throttleStep = 10
 
