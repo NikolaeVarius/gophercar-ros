@@ -57,11 +57,19 @@ const rosThrottleTopic = "/pwm-throttle"
 var pca *pca9685.Dev
 var sc statsd.Statter
 
+// Data Recording Config
+const defaultRecordingDir = "/tmp"
+
 // Other
 const statsdHost = "161.35.109.219"
 const statsdPort = "8125"
 
 var statsdURL = statsdHost + ":" + statsdPort
+
+type actuator struct {
+	angularValue, throttleValue float64
+	steeringPwm, throttlePwm    int
+}
 
 func init() {
 	// statsd
@@ -197,13 +205,14 @@ func main() {
 			select {
 			case <-ticker.C:
 				if emergencyStop == false {
-					carErr := handleActuatorMessage(msg)
+					actuator, carErr := handleActuatorMessage(msg)
 					if carErr != nil {
 						// This doesn't do anything right now
 						// This is a global variable that is checked every actuator cycle
 						emergencyStop = true
 						fmt.Println("Problem while driving, initiating Emergency Stop: " + carErr.Error())
 					}
+					fmt.Println(actuator)
 				} else {
 					setThrottle(0.0)
 					fmt.Println("Emergency Stop has been tripped. Ignoring Input. Restart Program to use vehicle")
@@ -228,10 +237,19 @@ func handleKeyboardMessage() {
 	return
 }
 
+func startRecording() {
+	return
+}
+
+func stopRecording() {
+	return
+}
+
 // Need to refator this to be less dumb
 // func handleActuatorMessage(msg *std_msgs.Float64MultiArray) error {
-func handleActuatorMessage(msg *sensor_msgs.Joy) error {
+func handleActuatorMessage(msg *sensor_msgs.Joy) (*actuator, error) {
 
+	actuatorVal := new(actuator)
 	stdMsg := covertJoyToStdMessage(msg)
 
 	// angularValue := msg.Data[0]
@@ -242,22 +260,27 @@ func handleActuatorMessage(msg *sensor_msgs.Joy) error {
 	// fmt.Printf("Recieved: %+v\n", msg)
 	scErr := sc.Inc("drive_node_recieved", 42, 0.0)
 	if scErr != nil {
-		return scErr
+		return actuatorVal, scErr
 	}
 
 	steeringPwm, steerErr := setSteering(angularValue)
 	_ = sc.Gauge("steering_pwm", int64(steeringPwm), 0.0)
 	if steerErr != nil {
-		return steerErr
+		return actuatorVal, steerErr
 	}
 
 	throttlePwm, throttleErr := setThrottle(throttleValue)
 	_ = sc.Gauge("throttle_pwm", int64(throttlePwm), 0.0)
 	if throttleErr != nil {
-		return throttleErr
+		return actuatorVal, throttleErr
 	}
 
-	return nil
+	actuatorVal.angularValue = angularValue
+	actuatorVal.throttleValue = throttleValue
+	actuatorVal.steeringPwm = steeringPwm
+	actuatorVal.throttlePwm = throttlePwm
+
+	return actuatorVal, nil
 }
 
 func joyButtonHandler(*std_msgs.Float64MultiArray) {
