@@ -193,13 +193,19 @@ func main() {
 		for msg := range actuatorMessages {
 			select {
 			case <-ticker.C:
-				carErr := handleActuatorMessage(msg)
-				if carErr != nil {
-					// This doesn't do anything right now
-					// This is a global variable that is checked every actuator cycle
-					emergencyStop = true
-					fmt.Println("Problem while driving, initiating Emergency Stop: " + carErr.Error())
+				if emergencyStop == false {
+					carErr := handleActuatorMessage(msg)
+					if carErr != nil {
+						// This doesn't do anything right now
+						// This is a global variable that is checked every actuator cycle
+						emergencyStop = true
+						fmt.Println("Problem while driving, initiating Emergency Stop: " + carErr.Error())
+					}
+				} else {
+					setThrottle(0.0)
+					fmt.Println("Emergency Stop has been tripped. Ignoring Input. Restart Program to use vehicle")
 				}
+
 			}
 		}
 
@@ -346,6 +352,13 @@ func handleJoyBtn(btnIndex float64) {
 	return
 }
 
+// sends stop PWM value and sets global emergency stop bool to true
+func executeEmergencyStop() {
+	fmt.Println("Enabling Emergency Stop")
+	emergencyStop = true
+	setThrottle(0.0)
+}
+
 func covertJoyToStdMessage(msg *sensor_msgs.Joy) std_msgs.Float64MultiArray {
 	var newMsg std_msgs.Float64MultiArray
 	// 4 probably isn't the right size
@@ -398,6 +411,7 @@ func covertJoyToStdMessage(msg *sensor_msgs.Joy) std_msgs.Float64MultiArray {
 	crossBtn := float64(msg.Buttons[1])
 	if crossBtn == 1 {
 		fmt.Println("Cross Pressed")
+		executeEmergencyStop()
 	}
 
 	circleBtn := float64(msg.Buttons[2])
