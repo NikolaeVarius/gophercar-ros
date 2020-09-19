@@ -31,7 +31,7 @@ const maxThrottle = 0
 
 // Initial Value to calibrate ESC Throttle
 const calibrationThrottlePulse = 350
-const minThrottlePulse = 300
+const minThrottlePulse = 0
 const maxThrottlePulse = 490
 const throttleChannel = 0
 const throttleStep = 10
@@ -101,19 +101,19 @@ func init() {
 	// When first started, the ESC needs to be calibrated with this pulse
 	// This should cause a blinking red light on the ESC to stop blinking, and a single beep to occur
 	fmt.Println("Initializing Throttle")
-	if err := pca.SetPwm(throttleChannel, 0, maxThrottlePulse); err != nil {
-		log.Fatal(err)
-	}
-	time.Sleep(10 * time.Millisecond)
+	// if err := pca.SetPwm(throttleChannel, 0, maxThrottlePulse); err != nil {
+	// 	log.Fatal(err)
+	// }
+	// time.Sleep(10 * time.Millisecond)
 
 	if err := pca.SetPwm(throttleChannel, 0, minThrottlePulse); err != nil {
 		log.Fatal(err)
 	}
 	time.Sleep(10 * time.Millisecond)
 
-	if err := pca.SetPwm(throttleChannel, 0, calibrationThrottlePulse); err != nil {
-		log.Fatal(err)
-	}
+	// if err := pca.SetPwm(throttleChannel, 0, calibrationThrottlePulse); err != nil {
+	// 	log.Fatal(err)
+	// }
 	time.Sleep(1 * time.Second)
 	fmt.Println("Red Light on ESC should not be blinking, and a single beep should have been output")
 
