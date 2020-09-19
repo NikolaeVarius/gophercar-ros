@@ -10,6 +10,8 @@ import (
 
 var port serial.Port
 
+const devicePath = "/dev/ttyTHS2"
+
 func init() {
 	mode := &serial.Mode{
 		BaudRate: 115200,
@@ -20,7 +22,7 @@ func init() {
 
 	var err error
 
-	port, err = serial.Open("/dev/ttyTHS1", mode)
+	port, err = serial.Open(devicePath, mode)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,7 +46,7 @@ func main() {
 			break
 		}
 		fmt.Print(n)
-		// fmt.Printf("%v", string(buff[:n]))
+		fmt.Printf("%v", string(buff[:n]))
 		fmt.Printf("%v\n", buff[0])
 		fmt.Printf("%v\n", buff[1])
 		port.ResetInputBuffer()
