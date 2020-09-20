@@ -1,5 +1,7 @@
-FROM local/ros-base:latest
+FROM ros:melodic-ros-core-bionic
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install ros-melodic-joy -y
 RUN apt-get autoremove -y
+RUN bash /opt/ros/melodic/setup.bash
+
 CMD "rosrun joy joy_node"
