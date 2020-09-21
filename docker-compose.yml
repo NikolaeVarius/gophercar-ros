@@ -1,0 +1,38 @@
+version: '2'
+
+networks:
+  ros:
+    driver: bridge
+
+services:
+  ros-master:
+    image: ros:kinetic-ros-core
+    command: stdbuf -o L roscore
+    networks:
+      - ros
+    restart: always
+
+  joy:
+    image: local/ros-joy:latest
+    depends_on:
+      - ros-master
+    environment:
+      - "ROS_MASTER_URI=http://ros-master:11311"
+      - "ROS_HOSTNAME=joy"
+    command:  /opt/ros/melodic/env.sh rosrun joy joy_node
+    networks:
+      - ros
+      - host
+    restart: always
+
+  # listener:
+  #   image: ros:kinetic-ros-core
+  #   depends_on:
+  #     - ros-master
+  #   environment:
+  #     - "ROS_MASTER_URI=http://ros-master:11311"
+  #     - "ROS_HOSTNAME=listener"
+  #   command: stdbuf -o L rostopic echo /chatter
+  #   networks:
+  #     - ros
+  #   restart: always
