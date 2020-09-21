@@ -139,7 +139,6 @@ func init() {
 }
 
 func main() {
-
 	// Register self as a node
 	n, err := goroslib.NewNode(goroslib.NodeConf{
 		Name:       "/gophercar-actuator",
@@ -152,14 +151,10 @@ func main() {
 	defer n.Close()
 
 	actuatorMessages := make(chan *sensor_msgs.Joy, 100)
-	// actuatorMessages := make(chan *std_msgs.Float64MultiArray, 100)
 
 	// Subscribe to actuator topic to process joy/keypresses
 	subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{Node: n,
 		Topic: rosActuatorTopic,
-		// Callback: func(msg *std_msgs.Float64MultiArray) {
-		// 	actuatorMessages <- msg
-		// },
 		Callback: func(msg *sensor_msgs.Joy) {
 			actuatorMessages <- msg
 		},
@@ -207,8 +202,6 @@ func main() {
 				if emergencyStop == false {
 					actuator, carErr := handleActuatorMessage(msg)
 					if carErr != nil {
-						// This doesn't do anything right now
-						// This is a global variable that is checked every actuator cycle
 						emergencyStop = true
 						fmt.Println("Problem while driving, initiating Emergency Stop: " + carErr.Error())
 					}
@@ -246,14 +239,11 @@ func stopRecording() {
 }
 
 // Need to refator this to be less dumb
-// func handleActuatorMessage(msg *std_msgs.Float64MultiArray) error {
 func handleActuatorMessage(msg *sensor_msgs.Joy) (*actuator, error) {
 
 	actuatorVal := new(actuator)
 	stdMsg := covertJoyToStdMessage(msg)
 
-	// angularValue := msg.Data[0]
-	// throttleValue := msg.Data[3]
 	angularValue := stdMsg.Data[0]
 	throttleValue := stdMsg.Data[3]
 
@@ -387,7 +377,6 @@ func executeEmergencyStop() {
 
 func covertJoyToStdMessage(msg *sensor_msgs.Joy) std_msgs.Float64MultiArray {
 	var newMsg std_msgs.Float64MultiArray
-	// 4 probably isn't the right size
 	data := make([]float64, 14)
 
 	// fmt.Println("Incoming: %#v\n", msg)
