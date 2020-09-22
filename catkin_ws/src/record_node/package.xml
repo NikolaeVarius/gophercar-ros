@@ -2,13 +2,15 @@
 <package>
   <name>record_node</name>
   <version>0.0.1</version>
-  <description></description>
+  <description>Record Data</description>
+  <maintainer email="temp@temp.com">Anon</maintainer>
+  <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>message_generation</build_depend>
   <build_depend>std_msgs</build_depend>
 
-  <exec_depend>message_runtime</build_depend>
+  <run_depend>message_runtime</run_depend>
   <run_depend>roslib</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>message_runtime</run_depend>
