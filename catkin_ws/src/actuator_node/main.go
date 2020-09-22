@@ -47,12 +47,8 @@ var emergencyStop = false
 const rosMasterNode = "donkeycar"
 const rosNodeName = "/actuator"
 
-// const rosActuatorTopic = "/joy"
-// const rosSteeringTopic = "/pwm-steering"
-// const rosThrottleTopic = "/pwm-throttle"
-const rosActuatorTopic = "/joy"
-const rosSteeringTopic = "/pwm-steering"
-const rosThrottleTopic = "/pwm-throttle"
+const rosJoyTopic = "/joy"
+const rosActuatorTopic = "/actuator"
 
 var pca *pca9685.Dev
 var sc statsd.Statter
@@ -68,7 +64,7 @@ var statsdURL = statsdHost + ":" + statsdPort
 
 type actuator struct {
 	angularValue, throttleValue float64
-	steeringPwm, throttlePwm    int
+	steeringPwm, throttlePwm    int16
 }
 
 func init() {
@@ -154,7 +150,7 @@ func main() {
 
 	// Subscribe to actuator topic to process joy/keypresses
 	subTopic, err := goroslib.NewSubscriber(goroslib.SubscriberConf{Node: n,
-		Topic: rosActuatorTopic,
+		Topic: rosJoyTopic,
 		Callback: func(msg *sensor_msgs.Joy) {
 			actuatorMessages <- msg
 		},
@@ -163,34 +159,20 @@ func main() {
 		fmt.Println("Most likely the topic this subscriber wants to attach to does not exist")
 		panic(err)
 	}
-	fmt.Println("Subscribed to: " + rosActuatorTopic)
+	fmt.Println("Subscribed to: " + rosJoyTopic)
 	defer subTopic.Close()
 
-	// publisher topic to publish current ESC values to a topic for reporting purposes
-	//
-	// escThrottleTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
-	// 	Node:  n,
-	// 	Topic: rosSteeringTopic,
-	// 	Msg:   &std_msgs.Int64{},
-	// 	Latch: false,
-	// })
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println("Connected to PWM-Throttle Publisher Topic")
-	// defer escThrottleTopic.Close()
+	actuatorTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
+		Node:  n,
+		Topic: rosActuatorTopic,
+		Msg:   &actuator{},
+		Latch: false,
+	})
 
-	// escSteeringTopic, err := goroslib.NewPublisher(goroslib.PublisherConf{
-	// 	Node:  n,
-	// 	Topic: rosThrottleTopic,
-	// 	Msg:   &std_msgs.Int64{},
-	// 	Latch: false,
-	// })
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println("Connected to PWM-Steering Publisher Topic")
-	// defer escSteeringTopic.Close()
+	if err != nil {
+		panic(err)
+	}
+	defer actuatorTopic.Close()
 
 	// Start doing stuff
 	ticker := time.NewTicker(100)
@@ -206,6 +188,7 @@ func main() {
 						fmt.Println("Problem while driving, initiating Emergency Stop: " + carErr.Error())
 					}
 					fmt.Println(actuator)
+					actuatorTopic.Write(actuator)
 				} else {
 					setThrottle(0.0)
 					fmt.Println("Emergency Stop has been tripped. Ignoring Input. Restart Program to use vehicle")
@@ -267,8 +250,8 @@ func handleActuatorMessage(msg *sensor_msgs.Joy) (*actuator, error) {
 
 	actuatorVal.angularValue = angularValue
 	actuatorVal.throttleValue = throttleValue
-	actuatorVal.steeringPwm = steeringPwm
-	actuatorVal.throttlePwm = throttlePwm
+	actuatorVal.steeringPwm = int16(steeringPwm)
+	actuatorVal.throttlePwm = int16(throttlePwm)
 
 	return actuatorVal, nil
 }
