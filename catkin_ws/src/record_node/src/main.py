@@ -9,6 +9,7 @@ from sensor_msgs.msg import CompressedImage, CameraInfo, Joy
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import json
+from record_node.msg import Actuator
 # from rospy_message_converter import json_message_converter
 
 count = 0
@@ -19,7 +20,7 @@ bridge = CvBridge()
 image_path = "./data/images/"
 joy_path = "./data/joy/"
 
-def callback(image, joy):
+def callback(actuator):
     count = count + 1
     
     if count % 10 == 0:
@@ -30,7 +31,7 @@ def callback(image, joy):
         # cv2_img = bridge.compressed_imgmsg_to_cv2(image, "bgr8")
         # image_filename = image_path + str(img_timestamp) + "-image.jpg"
         # cv2.imwrite(image_filename, cv2_img)
-        print("here")
+        print(actuator)
         # handle file
         # json_str = json_message_converter.convert_ros_message_to_json(joy)
         # json_filename = joy_path + str(img_timestamp) + ".json" 
@@ -45,13 +46,14 @@ def callback(image, joy):
 
 def main(args):
     # image_sub = message_filters.Subscriber('output/image_raw/compressed', CompressedImage)
-    actuator_sub = message_filters.Subscriber('actuator', Actuator)
+    # actuator_sub = message_filters.Subscriber('actuator', Actuator)
+    rospy.Subscriber('actuator', Actuator, callback)
 
     # https://docs.ros.org/api/message_filters/html/python/#message_filters.ApproximateTimeSynchronizer
     # Trying out between ApproximateTimeSynchronizer and TimeSynchronizer
     # I don't think 1 second of approximity is good enough consiering we are generating roughly 30 fps
     # ts = message_filters.ApproximateTimeSynchronizer([image_sub, actuator_sub], 100, 1)
-    # ts = message_filters.TimeSynchronizer([image_sub, joy_sub], 100)
+    # ts = message_filters.TimeSynchronizer([actuator_sub], 100)
     # ts.registerCallback(callback)
     
     try:
