@@ -22,7 +22,6 @@ services:
     command:  /opt/ros/melodic/env.sh rosrun joy joy_node
     networks:
       - ros
-      - host
     restart: always
 
   # listener:
