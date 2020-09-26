@@ -191,18 +191,15 @@ def main():
 
         # Non Compressed Image
         try:
-            # print("here")
-            msg = Image()
-            msg.header.stamp = rospy.Time.now()
-            # image = cv2.imdecode(np.fromstring(jpg, dtype=np.uint8), cv2.CV_LOAD_IMAGE_COLOR)
-            # image_message = cv.fromarray(1)
-            msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
-            # msg = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
-            # # print(msg)
-            # msg = np.asarray(frame)
-            # print(frame)
-            # image = bridge.cv2_to_imgmsg(msg, encoding="bgr8")
-            image_pub.publish(msg)
+            # msg = Image()
+            # msg.header.stamp = rospy.Time.now()
+            # msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
+            # msg.encoding = "bgr8"
+            # msg.height = 1
+            # msg.width = len(msg.data)
+            # msg.step = len(msg.data) * 3
+            image = bridge.cv2_to_imgmsg(frame, encoding="bgr8")
+            image_pub.publish(image)
         except CvBridgeError as e:
             print(e)
             sys.exit(1)
