@@ -28,7 +28,7 @@ VERBOSE=True
 LOG_AFTER_FRAMES=100 # Number of frames per log emitted reporting number of frames processed. Setting this to 0 should disable it
 
 # Toggle if a window showing camera output should pop up
-ENABLE_DISPLAY=False
+ENABLE_DISPLAY=True
 
 # Image Frame Settings
 GRAYSCALE=False # Convert to greyscale
@@ -50,7 +50,7 @@ def gstreamer_pipeline(
     capture_height=720,
     display_width=1280,
     display_height=720,
-    framerate=60,
+    framerate=59,
     flip_method=2,
 ):
     return (
@@ -135,7 +135,7 @@ def main():
     #image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage, queue_size=30)
     
     # Non Compressed Image
-    image_pub = rospy.Publisher("/output/image_raw/image", Image)
+    image_pub = rospy.Publisher("/output/image_raw/image", Image, queue_size=30)
     
     print(gstreamer_pipeline(flip_method=2))
     # Keep track of how many frames hav been generated
@@ -144,6 +144,8 @@ def main():
     previousTime = 0
 
     stream = VideoStream().start()
+
+    bridge = CvBridge()
     show = VideoShow(stream.frame)
 
     if ENABLE_DISPLAY is True:
@@ -189,12 +191,23 @@ def main():
 
         # Non Compressed Image
         try:
-            bridge = CvBridge()
+            # print("here")
             msg = Image()
-            image = bridge.cv2_to_imgmsg(msg, "passthrough")
-            image_pub.publish(image)
+            msg.header.stamp = rospy.Time.now()
+            # image = cv2.imdecode(np.fromstring(jpg, dtype=np.uint8), cv2.CV_LOAD_IMAGE_COLOR)
+            # image_message = cv.fromarray(1)
+            msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
+            # msg = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
+            # # print(msg)
+            # msg = np.asarray(frame)
+            # print(frame)
+            # image = bridge.cv2_to_imgmsg(msg, encoding="bgr8")
+            image_pub.publish(msg)
         except CvBridgeError as e:
             print(e)
+            sys.exit(1)
+        except:
+            sys.exit(1)
         
         
         frames = frames + 1
