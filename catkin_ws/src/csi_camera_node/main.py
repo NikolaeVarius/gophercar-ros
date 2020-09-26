@@ -18,7 +18,11 @@ from cv_bridge import CvBridge
 import numpy as np
 from scipy.ndimage import filters
 
+# For compressed image
 from sensor_msgs.msg import CompressedImage, Image
+# For non compressed image
+from cv_bridge import CvBridge, CvBridgeError
+
 # Logging
 VERBOSE=True
 LOG_AFTER_FRAMES=100 # Number of frames per log emitted reporting number of frames processed. Setting this to 0 should disable it
@@ -126,7 +130,13 @@ def main():
 
     # if args["enable-display"] == "false":
     #     ENABLE_DISPLAY = "false"
-    image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage, queue_size=30)
+    
+    # Compressed Image
+    #image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage, queue_size=30)
+    
+    # Non Compressed Image
+    image_pub = rospy.Publisher("/output/image_raw/image", Image)
+    
     print(gstreamer_pipeline(flip_method=2))
     # Keep track of how many frames hav been generated
     frames = 0
@@ -170,13 +180,23 @@ def main():
         show.frame = frame
 
         # ROS Image
-        msg = CompressedImage()
-        # msg = Image()
-        msg.header.stamp = rospy.Time.now()
-        msg.format = "jpeg"
-        msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
-        image_pub.publish(msg)
+        # Compressed Image
+        #msg = CompressedImage()
+        #msg.header.stamp = rospy.Time.now()
+        #msg.format = "jpeg"
+        #msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
+        #image_pub.publish(msg)
 
+        # Non Compressed Image
+        try:
+            bridge = CvBridge()
+            msg = Image()
+            image = bridge.cv2_to_imgmsg(msg, "passthrough")
+            image_pub.publish(image)
+        except CvBridgeError as e:
+            print(e)
+        
+        
         frames = frames + 1
         if LOG_AFTER_FRAMES != 0 and frames % LOG_AFTER_FRAMES == 0:
             print("Processed " + str(LOG_AFTER_FRAMES) + " frames for a total of " + str(frames))
