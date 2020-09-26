@@ -18,7 +18,7 @@ from cv_bridge import CvBridge
 import numpy as np
 from scipy.ndimage import filters
 
-from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import CompressedImage, Image
 # Logging
 VERBOSE=True
 LOG_AFTER_FRAMES=100 # Number of frames per log emitted reporting number of frames processed. Setting this to 0 should disable it
@@ -126,7 +126,7 @@ def main():
 
     # if args["enable-display"] == "false":
     #     ENABLE_DISPLAY = "false"
-    image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage, queue_size=30)
+    image_pub = rospy.Publisher("/output/image_raw/compressed", Image, queue_size=30)
     print(gstreamer_pipeline(flip_method=2))
     # Keep track of how many frames hav been generated
     frames = 0
@@ -170,7 +170,8 @@ def main():
         show.frame = frame
 
         # ROS Image
-        msg = CompressedImage()
+        # msg = CompressedImage()
+         msg = Image()
         msg.header.stamp = rospy.Time.now()
         msg.format = "jpeg"
         msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tostring()
