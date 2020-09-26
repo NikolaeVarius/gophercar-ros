@@ -126,7 +126,7 @@ def main():
 
     # if args["enable-display"] == "false":
     #     ENABLE_DISPLAY = "false"
-    image_pub = rospy.Publisher("/output/image_raw/compressed_image", CompressedImage, queue_size=30)
+    image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage, queue_size=30)
     print(gstreamer_pipeline(flip_method=2))
     # Keep track of how many frames hav been generated
     frames = 0
