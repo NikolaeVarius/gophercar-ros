@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"math"
 	"os"
 	"strconv"
 
+	"github.com/aler9/goroslib/msgs/geometry_msgs"
 	"gocv.io/x/gocv"
 	"gocv.io/x/gocv/contrib"
 )
@@ -19,12 +21,29 @@ func getBoundingCoordinates(rect image.Rectangle) (x1 int, y1 int, x2 int, y2 in
 	return rect.Min.X, rect.Min.Y, rect.Max.Y, rect.Max.Y
 }
 
+func getRectDistances(rect image.Rectangle) (dist float64) {
+	return math.Sqrt(math.Pow(float64(rect.Max.X-rect.Min.X), 2) + math.Pow(float64(rect.Max.Y-rect.Min.Y), 2))
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("How to run:\n\ttracking [camera ID]")
 		return
 	}
 
+	velocity := geometry_msgs.Twist{
+		Linear: geometry_msgs.Vector3{
+			X: 0.0,
+			Y: 0.0,
+			Z: 0.0,
+		},
+		Angular: geometry_msgs.Vector3{
+			X: 0.0,
+			Y: 0.0,
+			Z: 0.0,
+		},
+	}
+	fmt.Println(velocity)
 	// parse args
 	deviceID := os.Args[1]
 
@@ -85,12 +104,14 @@ func main() {
 
 		coordX, _ := getMiddleCoordinates(rect)
 		x1, y1, x2, y2 := getBoundingCoordinates(rect)
+		dist := getRectDistances(rect)
 
 		fmt.Println("x1: " + strconv.Itoa(x1))
 		fmt.Println("y1: " + strconv.Itoa(y1))
 		fmt.Println("x2: " + strconv.Itoa(x2))
 		fmt.Println("y2: " + strconv.Itoa(y2))
 		fmt.Println("Middle X: " + strconv.Itoa(coordX))
+		fmt.Println("Dist: " + strconv.FormatFloat(dist, 'f', 6, 64))
 
 		// draw it.
 		gocv.Rectangle(&img, rect, blue, 3)
