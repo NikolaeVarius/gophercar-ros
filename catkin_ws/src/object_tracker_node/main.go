@@ -2,12 +2,17 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"os"
 
 	"gocv.io/x/gocv"
 	"gocv.io/x/gocv/contrib"
 )
+
+func middle(rect image.Rectangle) (x int, y int) {
+	return (rect.Max.X-rect.Min.X)/2 + rect.Min.X, (rect.Max.Y-rect.Min.Y)/2 + rect.Min.Y
+}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -73,6 +78,9 @@ func main() {
 
 		// update the roi
 		rect, _ := tracker.Update(img)
+
+		coord, _ := middle(rect)
+		fmt.Println(coord)
 
 		// draw it.
 		gocv.Rectangle(&img, rect, blue, 3)
