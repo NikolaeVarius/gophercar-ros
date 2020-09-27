@@ -10,8 +10,12 @@ import (
 	"gocv.io/x/gocv/contrib"
 )
 
-func middle(rect image.Rectangle) (x int, y int) {
+func getMiddleCoordinates(rect image.Rectangle) (x int, y int) {
 	return (rect.Max.X-rect.Min.X)/2 + rect.Min.X, (rect.Max.Y-rect.Min.Y)/2 + rect.Min.Y
+}
+
+func getBoundingCoordinates(rect image.Rectangle) (x1 int, y1 int, x2 int, y2 int) {
+	return rect.Min.X, rect.Min.Y, rect.Max.Y, rect.Max.Y
 }
 
 func main() {
@@ -70,7 +74,6 @@ func main() {
 	for {
 		if ok := webcam.Read(&img); !ok {
 			fmt.Printf("Device closed: %v\n", deviceID)
-			return
 		}
 		if img.Empty() {
 			continue
@@ -79,8 +82,14 @@ func main() {
 		// update the roi
 		rect, _ := tracker.Update(img)
 
-		coordX, _ := middle(rect)
-		fmt.Println("X: " + string(coordX))
+		coordX, _ := getMiddleCoordinates(rect)
+		x1, y1, x2, y2 := getBoundingCoordinates(rect)
+
+		fmt.Println("x1: " + string(x1))
+		fmt.Println("y1: " + string(y1))
+		fmt.Println("x2: " + string(x2))
+		fmt.Println("y2: " + string(y2))
+		fmt.Println("Middle X: " + string(coordX))
 
 		// draw it.
 		gocv.Rectangle(&img, rect, blue, 3)
