@@ -79,8 +79,8 @@ func main() {
 		// update the roi
 		rect, _ := tracker.Update(img)
 
-		coord, _ := middle(rect)
-		fmt.Println(coord)
+		coordX, _ := middle(rect)
+		fmt.Println("X: " + string(coordX))
 
 		// draw it.
 		gocv.Rectangle(&img, rect, blue, 3)
