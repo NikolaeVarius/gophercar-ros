@@ -121,7 +121,34 @@ def resizeFrame(frame, scalePercent=100):
     newWidth = int(frame.shape[1] * scalePercent / 100)
     newHeight = int(frame.shape[0] * scalePercent / 100)
     return cv2.resize(frame, (newWidth, newHeight))
-    
+
+
+def cv2_to_imgmsg(self, cvim, encoding = "passthrough"):
+
+    if not isinstance(cvim, (np.ndarray, np.generic)):
+        raise TypeError('Your input type is not a numpy array')
+    img_msg = sensor_msgs.msg.Image()
+    img_msg.height = cvim.shape[0]
+    img_msg.width = cvim.shape[1]
+    print("here2")
+    if len(cvim.shape) < 3:
+        cv_type = self.dtype_with_channels_to_cvtype2(cvim.dtype, 1)
+    else:
+        cv_type = self.dtype_with_channels_to_cvtype2(cvim.dtype, cvim.shape[2])
+    if encoding == "passthrough":
+        img_msg.encoding = cv_type
+    else:
+        img_msg.encoding = encoding
+        # Verify that the supplied encoding is compatible with the type of the OpenCV image
+        if self.cvtype_to_name[self.encoding_to_cvtype2(encoding)] != cv_type:
+            raise CvBridgeError("encoding specified as %s, but image has incompatible type %s" % (encoding, cv_type))
+    print("here3")
+    if cvim.dtype.byteorder == '>':
+        img_msg.is_bigendian = True
+    img_msg.data = cvim.tostring()
+    img_msg.step = len(img_msg.data) // img_msg.height
+
+    return img_msg
 
 def main():
     # ap = argparse.ArgumentParser()
@@ -198,8 +225,38 @@ def main():
             # msg.height = 1
             # msg.width = len(msg.data)
             # msg.step = len(msg.data) * 3
-            image = bridge.cv2_to_imgmsg(frame, encoding="bgr8")
-            image_pub.publish(image)
+            # image = cv2_to_imgmsg(frame, encoding="bgr8")
+            # image_pub.publish(image)
+            cvim = frame
+            ############## HACKING THIS SHIT IN. LIB DOESNT WORK DONT KNOW WHY. COMMENTED OUT AREAS ARE BROKEN
+            #### THIS IS SHAMEFUL AND RIPPED OUT THE THE LIB
+
+            if not isinstance(cvim, (np.ndarray, np.generic)):
+                raise TypeError('Your input type is not a numpy array')
+            # img_msg = sensor_msgs.msg.Image()
+            img_msg = Image()
+            img_msg.height = cvim.shape[0]
+            img_msg.width = cvim.shape[1]
+            # if len(cvim.shape) < 3:
+            #     print("here3")
+            #     cv_type = self.dtype_with_channels_to_cvtype2(cvim.dtype, 1)
+            # else:
+            #     print("here4")
+            #     cv_type = self.dtype_with_channels_to_cvtype2(cvim.dtype, cvim.shape[2])
+            img_msg.encoding = "bgr8"
+            # if encoding == "passthrough":
+            #     img_msg.encoding = cv_type
+            # else:
+            #     img_msg.encoding = "bgr8"
+            #     # Verify that the supplied encoding is compatible with the type of the OpenCV image
+            #     if self.cvtype_to_name[self.encoding_to_cvtype2(encoding)] != cv_type:
+            #         raise CvBridgeError("encoding specified as %s, but image has incompatible type %s" % (encoding, cv_type))
+            if cvim.dtype.byteorder == '>':
+                img_msg.is_bigendian = True
+            img_msg.data = cvim.tostring()
+            img_msg.step = len(img_msg.data) // img_msg.height
+    #######################
+            image_pub.publish(img_msg)
         except CvBridgeError as e:
             print(e)
             sys.exit(1)
