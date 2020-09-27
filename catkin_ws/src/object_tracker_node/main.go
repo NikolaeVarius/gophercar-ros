@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"os"
+	"strconv"
 
 	"gocv.io/x/gocv"
 	"gocv.io/x/gocv/contrib"
@@ -85,11 +86,11 @@ func main() {
 		coordX, _ := getMiddleCoordinates(rect)
 		x1, y1, x2, y2 := getBoundingCoordinates(rect)
 
-		fmt.Println("x1: " + string(x1))
-		fmt.Println("y1: " + string(y1))
-		fmt.Println("x2: " + string(x2))
-		fmt.Println("y2: " + string(y2))
-		fmt.Println("Middle X: " + string(coordX))
+		fmt.Println("x1: " + strconv.Itoa(x1))
+		fmt.Println("y1: " + strconv.Itoa(y1))
+		fmt.Println("x2: " + strconv.Itoa(x2))
+		fmt.Println("y2: " + strconv.Itoa(y2))
+		fmt.Println("Middle X: " + strconv.Itoa(coordX))
 
 		// draw it.
 		gocv.Rectangle(&img, rect, blue, 3)
